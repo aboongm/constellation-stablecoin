@@ -49,12 +49,6 @@ contract CoinGold is ERC20 {
         return answer;
     }
 
-    // Function to provide monthly or quarterly gold holding statement
-    // Add logic to verify and generate proof of gold reserves
-    function provideGoldHoldingStatement() external onlyOwner {
-        // Implement proof of gold reserves logic here
-    }
-
     // Mint new SANCoinGoldA tokens backed by physical gold
     function mintCoinGold(uint256 gramsOfGold) external onlyOwner {
         // Mint the corresponding CoinGold tokens directly based on gramsOfGold
