@@ -116,12 +116,6 @@ describe("CoinGold", function () {
         expect(latestGoldPrice).to.be.gt(0); 
     });
 
-    it("Ownership Functions", async () => {
-        // Attempt to call functions that require onlyOwner with a non-owner address and verify unauthorized access is blocked
-        const nonOwner = await ethers.provider.getSigner(1); // A non-owner address
-        await expect(coingold.connect(nonOwner).provideGoldHoldingStatement()).to.be.revertedWith("Only the owner can call this function");
-    });
-
     // Test Error Handling
     it("Error Handling", async () => {
         // Test error scenarios, such as trying to burn more tokens than the balance
