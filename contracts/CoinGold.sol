@@ -3,7 +3,6 @@ pragma solidity 0.8.20;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import {CoinDollar} from "./CoinDollar.sol"; // Import the CoinGold token contract
 
 contract CoinGold is ERC20 {
     // uint256 public goldAmtReserveStatement;  // number of grams of gold from monthly statement
@@ -14,7 +13,6 @@ contract CoinGold is ERC20 {
     event Mint(address indexed to, uint256 amount);
     event Burn(address indexed from, uint256 amount);
     event ExchangeGoldToDollar(address indexed from, uint256 amount);
-    CoinDollar public coinDollar;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can call this function");
@@ -57,7 +55,7 @@ contract CoinGold is ERC20 {
         emit Mint(msg.sender, gramsOfGold); // Emit the Mint event here
     }
 
-    // Burn CoinGold tokens when required, only callable by the owner
+    // Burn CoinGold tokens when required, only callable by the ow0x80aC9A24c136cc2E722521f899951F6065aAB77aner
     function burnCoinGold(uint256 amount) external onlyOwner {
         // Implement logic to burn CoinGold tokens when needed
         // Make sure to check if the contract has sufficient balance for burning
@@ -81,34 +79,5 @@ contract CoinGold is ERC20 {
     }
     
     // Add other functions and modifiers as needed to meet your requirements
-
-     // Function to set the CoinDollar contract address
-    function setCoinDollarContract(address _coinDollar) external onlyOwner {
-        coinDollar = CoinDollar(_coinDollar);
-    }
-
-    function exchangeGoldToDollar(uint256 amount) public {
-        require(balanceOf(msg.sender) >= amount, "Insufficient CoinGold balance");
-
-        // Burn CoinGold
-        _burn(msg.sender, amount);
-
-        // Calculate the amount of CoinDollar to mint
-        uint256 coinDollarAmount = calculateCoinDollarAmount(amount);
-
-        // Mint CoinDollar
-        coinDollar.mintFromCoinGold(msg.sender, coinDollarAmount);
-
-        emit ExchangeGoldToDollar(msg.sender, amount);
-    }
-
-    // Function to calculate the amount of CoinDollar based on the amount of CoinGold
-    function calculateCoinDollarAmount(uint256 coinGoldAmount) private view returns (uint256) {
-        (, int256 goldPrice, , , ) = dataFeed.latestRoundData();
-        require(goldPrice > 0, "Invalid gold price");
-
-        // Example calculation: You might need to adjust the formula based on your tokenomics
-        uint256 coinDollarAmount = (coinGoldAmount * uint256(goldPrice)) / 1e8;
-        return coinDollarAmount;
-    }
+    
 }

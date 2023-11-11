@@ -104,6 +104,36 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         _mint(to, amount);
     }
 
+    function setCoinDollarContract(address _coinDollar) external onlyOwner {
+        coinDollar = CoinDollar(_coinDollar);
+    }
+     
+
+    function exchangeGoldToDollar(uint256 amount) public {
+        require(balanceOf(msg.sender) >= amount, "Insufficient CoinGold balance");
+
+        // Burn CoinGold
+        _burn(msg.sender, amount);
+
+        // Calculate the amount of CoinDollar to mint
+        uint256 coinDollarAmount = calculateCoinDollarAmount(amount);
+
+        // Mint CoinDollar
+        coinDollar.mintFromCoinGold(msg.sender, coinDollarAmount);
+
+        emit ExchangeGoldToDollar(msg.sender, amount);
+    }
+
+    // Function to calculate the amount of CoinDollar based on the amount of CoinGold
+    function calculateCoinDollarAmount(uint256 coinGoldAmount) private view returns (uint256) {
+        (, int256 goldPrice, , , ) = dataFeed.latestRoundData();
+        require(goldPrice > 0, "Invalid gold price");
+
+        // Example calculation: You might need to adjust the formula based on your tokenomics
+        uint256 coinDollarAmount = (coinGoldAmount * uint256(goldPrice)) / 1e8;
+        return coinDollarAmount;
+    }
+
     function mint(uint256 amount) external onlyOwner {
         // Mint function for CoinDollar
         _mint(msg.sender, amount);

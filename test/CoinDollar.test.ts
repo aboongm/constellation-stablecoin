@@ -24,11 +24,11 @@ describe("CoinDollar", function () {
     coinGold = await CoinGoldFactory.deploy(
       "CoinGold",
       "CNGD",
-      goldReserveStatement,
+      // goldReserveStatement,
       mockPriceFeed.target
     );
     
-    await coinGold.mintCoinGold(await coinGold.goldAmtReserveStatement())
+    // await coinGold.mintCoinGold(await coinGold.goldAmtReserveStatement())
     
     const CoinDollarFactory = await ethers.getContractFactory("CoinDollar");
     coinDollar = await CoinDollarFactory.deploy(

@@ -7,11 +7,10 @@ async function main() {
   // Example parameters for the CoinGold constructor
   const name = "CoinGold";
   const symbol = "CNGD";
-  const goldAmtReserveStatement = 1000000; // You can set this value as needed
   const _dataFeedAddress = "0xC5981F461d74c46eB4b0CF3f4Ec79f025573B0Ea";
   // Deploy the CoinGold contract with the specified parameters
   const CoinGold = await ethers.getContractFactory("CoinGold");
-  const token = await CoinGold.deploy(name, symbol, goldAmtReserveStatement, _dataFeedAddress);
+  const token = await CoinGold.deploy(name, symbol, _dataFeedAddress);
 
   // Get the contract address from the deployed contract instance
   const contractAddress = await token.getAddress();
