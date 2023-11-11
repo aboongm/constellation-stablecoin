@@ -95,6 +95,8 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         lastAdjustmentTimestamp = block.timestamp;
     }
 
+    CoinDollar public coinDollar;
+
     function setCoinGoldContract(address _coinGold) external onlyOwner {
         coinGoldContract = _coinGold;
     }
