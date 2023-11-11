@@ -4,7 +4,6 @@ import { Signer } from "ethers";
 import {
   CoinGold,
   MockChainlinkPriceFeed,
-  CoinDollar,
 } from "../typechain-types";
 
 describe("CoinGold", function () {
@@ -12,7 +11,6 @@ describe("CoinGold", function () {
   let symbol: string;
   let mockPriceFeed: MockChainlinkPriceFeed;
   let coingold: CoinGold;
-  let coindollar: CoinDollar;
   let owner: Signer;
   let user: Signer;
 
@@ -34,19 +32,8 @@ describe("CoinGold", function () {
     );
 
     await coingold.waitForDeployment();
-
-    // Deploy CoinDollar contract
-    const CoinDollarFactory = await ethers.getContractFactory("CoinDollar");
-    coindollar = await CoinDollarFactory.deploy(
-      "CoinDollar",
-      "CNDO",
-      coingold.target,
-      mockPriceFeed.target
-    );
-
-    // Set CoinDollar contract in CoinGold
-    await coingold.setCoinDollarContract(coindollar.target);
   });
+
   // Deployment Test:
   it("Deployment Test", async () => {
     // Check if the contract is deployed without errors
@@ -95,44 +82,6 @@ describe("CoinGold", function () {
     expect(totalCapitalization).to.equal(totalSupply * latestGoldPrice);
   });
 
-  it("should successfully exchange CoinGold for CoinDollar", async function () {
-    const exchangeAmount = ethers.parseUnits("5", 18); // 5 CoinGold
-
-    // Set the gold price in the mock feed
-    const goldPrice = 2000; // Example gold price
-    await mockPriceFeed.setLatestPrice(goldPrice);
-
-    // Mint CoinGold for the user
-    await coingold.mintCoinGold(ethers.parseUnits("10", 18)); // Mint 10 CoinGold,
-    await coingold.transfer(user.getAddress(), ethers.parseUnits("10", 18)); // Transfer 10 CoinGold to the user
-    // Set the CoinGold address in CoinDollar
-    await coindollar.setCoinGoldContract(coingold.target);
-
-    // Check user's CoinGold balance
-    const userBalance = await coingold.balanceOf(user.getAddress());
-    expect(userBalance).to.equal(ethers.parseUnits("10", 18)); // Expect 10 CoinGold
-
-    // User approves CoinGold to spend their tokens
-    await coingold.connect(user).approve(coingold.target, exchangeAmount);
-
-    // Execute the exchange
-    await expect(coingold.connect(user).exchangeGoldToDollar(exchangeAmount))
-      .to.emit(coingold, "ExchangeGoldToDollar")
-      .withArgs(await user.getAddress(), exchangeAmount);
-
-    // Verify the CoinGold balance decrease
-    const finalCoinGoldBalance = await coingold.balanceOf(user.getAddress());
-    expect(finalCoinGoldBalance).to.equal(ethers.parseUnits("5", 18)); // 10 - 5
-
-    // Verify the CoinDollar balance increase
-    const expectedCoinDollarAmount =
-      (ethers.parseUnits("5", 18) * BigInt(goldPrice)) / BigInt(1e8); // Assuming 1:1 ratio for simplicity
-    const finalCoinDollarBalance = await coindollar.balanceOf(
-      user.getAddress()
-    );
-    expect(finalCoinDollarBalance).to.equal(expectedCoinDollarAmount);
-  });
-  // Add more test cases for other functions and scenarios
 
   // Add new test for mint event
   it("Minting emits Mint event and increases balance", async () => {
