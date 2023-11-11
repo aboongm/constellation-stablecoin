@@ -6,39 +6,41 @@ import { CoinGold, MockChainlinkPriceFeed, CoinDollar } from "../typechain-types
 describe("CoinGold", function () {
     let name: string;
     let symbol: string;
+    let goldReserveStatement: number;
     let mockPriceFeed: MockChainlinkPriceFeed;
     let coingold: CoinGold;
     let coindollar: CoinDollar
     let owner: Signer;
-    let user: Signer; 
+    let user: Signer;
+
 
     this.beforeEach(async () => {
         name = "CoinGold Token"
         symbol = "CNGD"
-        const owner = await ethers.provider.getSigner(0);
-        const user = await ethers.provider.getSigner(1);
+        goldReserveStatement = 100000;
+        [owner, user] = await ethers.getSigners();
 
         const MockPriceFeedFactory = await ethers.getContractFactory("MockChainlinkPriceFeed"); 
         mockPriceFeed = await MockPriceFeedFactory.deploy(2000);
 
         const CoinGoldFactory = await ethers.getContractFactory("CoinGold");
+        coingold = await CoinGoldFactory.deploy(name, symbol, goldReserveStatement, mockPriceFeed.target);
         
         await coingold.waitForDeployment();
-        
+
         // Deploy CoinDollar contract
         const CoinDollarFactory = await ethers.getContractFactory("CoinDollar");
         coindollar = await CoinDollarFactory.deploy("CoinDollar", "CNDO", coingold.target, mockPriceFeed.target);
 
         // Set CoinDollar contract in CoinGold
-        await coingold.setCoinDollarContract(coindollar.target); 
+        await coingold.setCoinDollarContract(coindollar.target);
     })
-
     // Deployment Test:
     it("Deployment Test", async () => {
         // Check if the contract is deployed without errors
         expect(coingold.getAddress()).to.not.equal(0);
     });
-    /*
+    
     it("Owner Assignment", async () => {
         // Check if the owner is correctly set to the deployer's address
         const owner = await coingold.owner();
@@ -77,7 +79,7 @@ describe("CoinGold", function () {
       await mockPriceFeed.setLatestPrice(goldPrice);
 
       // Mint CoinGold for the user
-      await coingold.mintCoinGold(ethers.parseUnits("10", 18)); // Mint 10 CoinGold
+      await coingold.mintCoinGold(ethers.parseUnits("10", 18)); // Mint 10 CoinGold,
       await coingold.transfer(user.getAddress(), ethers.parseUnits("10", 18)); // Transfer 10 CoinGold to the user
       // Set the CoinGold address in CoinDollar
       await coindollar.setCoinGoldContract(coingold.target);
@@ -213,5 +215,5 @@ describe("CoinGold", function () {
     // Add more test cases for different scenarios as needed
     // Ensure you cover other functions, contract interactions, edge cases, upgradeability, and random testing
     // Upgradeability: If applicable, test the upgrade process
-    // Random Testing: Perform random testing to ensure the contract handles various inputs and scenarios*/
-})  
+    // Random Testing: Perform random testing to ensure the contract handles various inputs and scenarios
+})

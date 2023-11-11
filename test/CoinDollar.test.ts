@@ -222,7 +222,7 @@ describe("CoinDollar", function () {
       expect(newSupply).to.be.above(initialSupply);
     });
   
-    it("should trigger upkeep when CoinDollar supply is too high", async function () {
+    /* it("should trigger upkeep when CoinDollar supply is too high", async function () {
       // Set the gold price to make CoinDollar's total supply more than double of CoinGold's total capitalization
       const requiredGoldPrice = await calculateRequiredGoldPriceForSupplyDecrease(coinGold, coinDollar);
       await mockPriceFeed.setLatestPrice(BigInt(requiredGoldPrice) * BigInt(1e8)); 
@@ -236,9 +236,9 @@ describe("CoinDollar", function () {
       await coinDollar.performUpkeep("0x");
       const newSupply = await coinDollar.totalSupply();
       expect(newSupply).to.be.below(initialSupply);
-    });
+    }); */
 
-    /* it("should trigger upkeep when CoinDollar supply is too high", async function () {
+    it("should trigger upkeep when CoinDollar supply is too high", async function () {
       // First, ensure CoinDollar's total supply is more than double the total capitalization of CoinGold
       // This may need to mint CoinDollar tokens or adjust the gold price to achieve this
       // Example: mint a large amount of CoinDollar tokens
@@ -258,7 +258,7 @@ describe("CoinDollar", function () {
       await coinDollar.performUpkeep("0x");
       const newSupply = await coinDollar.totalSupply();
       expect(newSupply).to.be.below(initialSupply);
-  }); */
+  }); 
   
   });
   
