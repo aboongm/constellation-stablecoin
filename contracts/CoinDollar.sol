@@ -113,7 +113,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
     } */
      
 
-    function exchangeGoldToDollar(uint256 amount) public {
+    /* function exchangeGoldToDollar(uint256 amount) public {
         require(balanceOf(msg.sender) >= amount, "Insufficient CoinGold balance");
 
         // Burn CoinGold
@@ -126,7 +126,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         coinDollar.mintFromCoinGold(msg.sender, coinDollarAmount);
 
         emit ExchangeGoldToDollar(msg.sender, amount);
-    }
+    } */
 
     // Function to calculate the amount of CoinDollar based on the amount of CoinGold
     function calculateCoinDollarAmount(uint256 coinGoldAmount) private view returns (uint256) {
