@@ -12,7 +12,6 @@ contract CoinGold is ERC20 {
     // Events
     event Mint(address indexed to, uint256 amount);
     event Burn(address indexed from, uint256 amount);
-    // event ExchangeGoldToDollar(address indexed from, uint256 amount);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can call this function");

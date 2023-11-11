@@ -7,7 +7,7 @@ import {CoinGold} from "./CoinGold.sol"; // Import the CoinGold token contract
 import "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
 
 contract CoinDollar is ERC20, AutomationCompatibleInterface {
-    CoinGold public coinGold; // Reference to the CoinGOld token contract
+    CoinGold public coinGold; // Reference to the CoinGold token contract
     AggregatorV3Interface internal goldPriceFeed; // Chainlink Aggregator for XAU/USD
     address public owner;
     uint256 public lastAdjustmentTimestamp;
@@ -18,6 +18,8 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
     uint256 public lastGoldPrice;
 
     address public coinGoldContract; // Address of the CoinGold contract
+
+    event ExchangeGoldToDollar(address indexed from, uint256 amount);
 
     modifier onlyCoinGold() {
         require(msg.sender == coinGoldContract, "Caller is not CoinGold");
@@ -104,9 +106,9 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         _mint(to, amount);
     }
 
-    function setCoinDollarContract(address _coinDollar) external onlyOwner {
+    /* function setCoinDollarContract(address _coinDollar) external onlyOwner {
         coinDollar = CoinDollar(_coinDollar);
-    }
+    } */
      
 
     function exchangeGoldToDollar(uint256 amount) public {
@@ -126,7 +128,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
 
     // Function to calculate the amount of CoinDollar based on the amount of CoinGold
     function calculateCoinDollarAmount(uint256 coinGoldAmount) private view returns (uint256) {
-        (, int256 goldPrice, , , ) = dataFeed.latestRoundData();
+        (, int256 goldPrice, , , ) = goldPriceFeed.latestRoundData();
         require(goldPrice > 0, "Invalid gold price");
 
         // Example calculation: You might need to adjust the formula based on your tokenomics
