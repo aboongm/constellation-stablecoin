@@ -3,9 +3,9 @@ pragma solidity 0.8.20;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {CoinDollar} from "./CoinDollar.sol"; // Import the CoinGold token contract
 
 contract CoinGold is ERC20 {
-    uint256 public goldAmtReserveStatement;  // number of grams of gold from monthly statement
     AggregatorV3Interface internal dataFeed; // Chainlink Aggregator for XAU/USD
     address public owner;
 
@@ -13,6 +13,7 @@ contract CoinGold is ERC20 {
     event Mint(address indexed to, uint256 amount);
     event Burn(address indexed from, uint256 amount);
     event ExchangeGoldToDollar(address indexed from, uint256 amount);
+    CoinDollar public coinDollar;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can call this function");
@@ -27,10 +28,8 @@ contract CoinGold is ERC20 {
     constructor(
         string memory name,
         string memory symbol,
-        uint256 _goldAmtReserveStatement,
         address _dataFeedAddress
     ) ERC20(name, symbol) {
-        goldAmtReserveStatement = _goldAmtReserveStatement;
         dataFeed = AggregatorV3Interface(
             _dataFeedAddress
         );
@@ -52,6 +51,7 @@ contract CoinGold is ERC20 {
     // Mint new SANCoinGoldA tokens backed by physical gold
     function mintCoinGold(uint256 gramsOfGold) external onlyOwner {
         // Mint the corresponding CoinGold tokens directly based on gramsOfGold
+        require(gramsOfGold > 0, "Mint amount must be greater than zero");
         _mint(msg.sender, gramsOfGold);
         emit Mint(msg.sender, gramsOfGold); // Emit the Mint event here
     }
@@ -60,6 +60,7 @@ contract CoinGold is ERC20 {
     function burnCoinGold(uint256 amount) external onlyOwner {
         // Implement logic to burn CoinGold tokens when needed
         // Make sure to check if the contract has sufficient balance for burning
+        require(amount > 0, "Burn amount must be greater than zero");
         require(balanceOf(msg.sender) >= amount, "Insufficient CoinGold balance");
 
         // Implement the burning mechanism
@@ -80,11 +81,33 @@ contract CoinGold is ERC20 {
     
     // Add other functions and modifiers as needed to meet your requirements
 
-    function exchangeGoldToDollar(uint256 amount) public{
-        require(balanceOf(msg.sender)>=amount,"Insufficient CoinGold balance to redeem");
+     // Function to set the CoinDollar contract address
+    function setCoinDollarContract(address _coinDollar) external onlyOwner {
+        coinDollar = CoinDollar(_coinDollar);
+    }
 
-        _burn(msg.sender,amount);
+    function exchangeGoldToDollar(uint256 amount) public {
+        require(balanceOf(msg.sender) >= amount, "Insufficient CoinGold balance");
 
-        emit ExchangeGoldToDollar(msg.sender,amount);
+        // Burn CoinGold
+        _burn(msg.sender, amount);
+
+        // Calculate the amount of CoinDollar to mint
+        uint256 coinDollarAmount = calculateCoinDollarAmount(amount);
+
+        // Mint CoinDollar
+        coinDollar.mintFromCoinGold(msg.sender, coinDollarAmount);
+
+        emit ExchangeGoldToDollar(msg.sender, amount);
+    }
+
+    // Function to calculate the amount of CoinDollar based on the amount of CoinGold
+    function calculateCoinDollarAmount(uint256 coinGoldAmount) private view returns (uint256) {
+        (, int256 goldPrice, , , ) = dataFeed.latestRoundData();
+        require(goldPrice > 0, "Invalid gold price");
+
+        // Example calculation: You might need to adjust the formula based on your tokenomics
+        uint256 coinDollarAmount = (coinGoldAmount * uint256(goldPrice)) / 1e8;
+        return coinDollarAmount;
     }
 }

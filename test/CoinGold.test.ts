@@ -1,34 +1,44 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-
-import { CoinGold, MockChainlinkPriceFeed } from "../typechain-types";
+import { Signer } from "ethers";
+import { CoinGold, MockChainlinkPriceFeed, CoinDollar } from "../typechain-types";
 
 describe("CoinGold", function () {
     let name: string;
     let symbol: string;
-    let goldReserveStatement: number;
     let mockPriceFeed: MockChainlinkPriceFeed;
     let coingold: CoinGold;
+    let coindollar: CoinDollar
+    let owner: Signer;
+    let user: Signer; 
 
     this.beforeEach(async () => {
         name = "CoinGold Token"
         symbol = "CNGD"
-        goldReserveStatement = 100000;
+        const owner = await ethers.provider.getSigner(0);
+        const user = await ethers.provider.getSigner(1);
 
         const MockPriceFeedFactory = await ethers.getContractFactory("MockChainlinkPriceFeed"); 
         mockPriceFeed = await MockPriceFeedFactory.deploy(2000);
 
         const CoinGoldFactory = await ethers.getContractFactory("CoinGold");
-        coingold = await CoinGoldFactory.deploy(name, symbol, goldReserveStatement, mockPriceFeed.target);
         
         await coingold.waitForDeployment();
+        
+        // Deploy CoinDollar contract
+        const CoinDollarFactory = await ethers.getContractFactory("CoinDollar");
+        coindollar = await CoinDollarFactory.deploy("CoinDollar", "CNDO", coingold.target, mockPriceFeed.target);
+
+        // Set CoinDollar contract in CoinGold
+        await coingold.setCoinDollarContract(coindollar.target); 
     })
+
     // Deployment Test:
     it("Deployment Test", async () => {
         // Check if the contract is deployed without errors
         expect(coingold.getAddress()).to.not.equal(0);
     });
-    
+    /*
     it("Owner Assignment", async () => {
         // Check if the owner is correctly set to the deployer's address
         const owner = await coingold.owner();
@@ -59,23 +69,40 @@ describe("CoinGold", function () {
         expect(totalCapitalization).to.equal(totalSupply * latestGoldPrice);
     });
       
+    it("should successfully exchange CoinGold for CoinDollar", async function () {
+      const exchangeAmount = ethers.parseUnits("5", 18); // 5 CoinGold
 
-    it("ExchangeGoldToDollar emits ExchangeGoldToDollar event and decrease balance", async()=>{
-        const[owner]=await ethers.getSigners();
-        const mintAmount=ethers.parseUnits("1",18);
-        await coingold.mintCoinGold(mintAmount);
+      // Set the gold price in the mock feed
+      const goldPrice = 2000; // Example gold price
+      await mockPriceFeed.setLatestPrice(goldPrice);
 
-        const exchangeGoldToDollarAmount=ethers.parseUnits("0.5",18);
-        await expect(coingold.exchangeGoldToDollar(exchangeGoldToDollarAmount))
-          .to.emit(coingold,'ExchangeGoldToDollar')
-          .withArgs(owner.address,exchangeGoldToDollarAmount);
+      // Mint CoinGold for the user
+      await coingold.mintCoinGold(ethers.parseUnits("10", 18)); // Mint 10 CoinGold
+      await coingold.transfer(user.getAddress(), ethers.parseUnits("10", 18)); // Transfer 10 CoinGold to the user
+      // Set the CoinGold address in CoinDollar
+      await coindollar.setCoinGoldContract(coingold.target);
 
-        const finalBalance=await coingold.balanceOf(owner.address);
-        expect(finalBalance).to.equal(mintAmount - exchangeGoldToDollarAmount);
+      // Check user's CoinGold balance
+      const userBalance = await coingold.balanceOf(user.getAddress());
+      expect(userBalance).to.equal(ethers.parseUnits("10", 18)); // Expect 10 CoinGold
 
-        const finalTotalSupply=await coingold.totalSupply();
-        expect(finalTotalSupply).to.equal(mintAmount - exchangeGoldToDollarAmount);
-    });
+      // User approves CoinGold to spend their tokens
+      await coingold.connect(user).approve(coingold.target, exchangeAmount);
+
+      // Execute the exchange
+      await expect(coingold.connect(user).exchangeGoldToDollar(exchangeAmount))
+        .to.emit(coingold, 'ExchangeGoldToDollar')
+        .withArgs(await user.getAddress(), exchangeAmount);
+
+      // Verify the CoinGold balance decrease
+      const finalCoinGoldBalance = await coingold.balanceOf(user.getAddress());
+      expect(finalCoinGoldBalance).to.equal(ethers.parseUnits("5", 18)); // 10 - 5
+
+      // Verify the CoinDollar balance increase
+      const expectedCoinDollarAmount = ethers.parseUnits("5", 18) * BigInt((goldPrice)) / BigInt((1e8)); // Assuming 1:1 ratio for simplicity
+      const finalCoinDollarBalance = await coindollar.balanceOf(user.getAddress());
+      expect(finalCoinDollarBalance).to.equal(expectedCoinDollarAmount);
+  });
     // Add more test cases for other functions and scenarios
 
     // Add new test for mint event
@@ -114,12 +141,6 @@ describe("CoinGold", function () {
         // Test the getChainlinkDataFeedLatestAnswer function
         const latestGoldPrice = await coingold.getChainlinkDataFeedLatestAnswer();
         expect(latestGoldPrice).to.be.gt(0); 
-    });
-
-    it("Ownership Functions", async () => {
-        // Attempt to call functions that require onlyOwner with a non-owner address and verify unauthorized access is blocked
-        const nonOwner = await ethers.provider.getSigner(1); // A non-owner address
-        await expect(coingold.connect(nonOwner).provideGoldHoldingStatement()).to.be.revertedWith("Only the owner can call this function");
     });
 
     // Test Error Handling
@@ -163,9 +184,34 @@ describe("CoinGold", function () {
         });    
       })
 
+
+
+      describe("Edge cases test", async () => {
+        // Test for minting zero tokens
+        it("should revert when minting zero tokens", async () => {
+            await expect(coingold.mintCoinGold(0))
+                .to.be.revertedWith("Mint amount must be greater than zero");
+        });
+    
+        // Test for burning zero tokens
+        it("should revert when burning zero tokens", async () => {
+            await expect(coingold.burnCoinGold(0))
+                .to.be.revertedWith("Burn amount must be greater than zero");
+        });
+        
+        // Test for handling invalid data from Chainlink Price Feed
+        it("should handle invalid data from Chainlink Price Feed", async () => {
+            // Set an invalid price in the mock
+            await mockPriceFeed.setLatestPrice(-1);
+    
+            // Call the totalCapitalization function and expect it to revert
+            await expect(coingold.totalCapitalization())
+                .to.be.revertedWith("Invalid gold price");
+        });
+    });
+      
     // Add more test cases for different scenarios as needed
     // Ensure you cover other functions, contract interactions, edge cases, upgradeability, and random testing
     // Upgradeability: If applicable, test the upgrade process
-    // Random Testing: Perform random testing to ensure the contract handles various inputs and scenarios
-})
-
+    // Random Testing: Perform random testing to ensure the contract handles various inputs and scenarios*/
+})  

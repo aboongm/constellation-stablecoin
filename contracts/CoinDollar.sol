@@ -4,15 +4,25 @@ pragma solidity 0.8.20;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {CoinGold} from "./CoinGold.sol"; // Import the CoinGold token contract
+import "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
 
-contract Xehn is ERC20 {
+contract CoinDollar is ERC20, AutomationCompatibleInterface {
     CoinGold public coinGold; // Reference to the CoinGOld token contract
     AggregatorV3Interface internal goldPriceFeed; // Chainlink Aggregator for XAU/USD
     address public owner;
     uint256 public lastAdjustmentTimestamp;
     uint256 public reserveRatio; // Reserve ratio in percentage (60% reserve)
-    uint256 public maximumBackingValue; // 100% USD value of CoinGoldCOIN
-    uint256 public minimumBackingValue; // 50% USD value of CoinGoldCOIN
+    uint256 public maximumBackingValue; // 100% USD value of CoinGold
+    uint256 public minimumBackingValue; // 50% USD value of CoinGold
+
+    uint256 public lastGoldPrice;
+
+    address public coinGoldContract; // Address of the CoinGold contract
+
+    modifier onlyCoinGold() {
+        require(msg.sender == coinGoldContract, "Caller is not CoinGold");
+        _;
+    }
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can call this function");
@@ -32,9 +42,11 @@ contract Xehn is ERC20 {
         reserveRatio = 20; // 20% reserve
         maximumBackingValue = coinGold.totalCapitalization();
         minimumBackingValue = maximumBackingValue / 2;
+
+        lastGoldPrice = uint256(getGoldPrice());
     }
 
-    function getGoldPrice() public view returns (int256) {
+    function getGoldPrice() public view returns (uint256) {
         (
             ,
             /* uint80 roundID */ int256 price /* uint startedAt */ /* uint timeStamp */ /* uint80 answeredInRound */,
@@ -42,16 +54,16 @@ contract Xehn is ERC20 {
             ,
 
         ) = goldPriceFeed.latestRoundData();
-        return price;
+        require(price > 0, "Invalid gold price");
+        return uint256(price);
     }
 
-    function adjustSupply() external onlyOwner {
+   function adjustSupplyInternal() internal {
         // Calculate the change in the value of gold and adjust supply accordingly
         uint256 currentGoldPrice = uint256(getGoldPrice());
         require(currentGoldPrice > 0, "Invalid gold price");
 
-        uint256 totalCapitalizationCoinGold = (currentGoldPrice / 1e8) *
-            coinGold.totalSupply();
+        uint256 totalCapitalizationCoinGold = (getGoldPrice() / 1e8) * coinGold.totalSupply();
 
         if (totalCapitalizationCoinGold > totalSupply()) {
             // Increase the supply to match the increased INR value of CoinGold
@@ -81,13 +93,43 @@ contract Xehn is ERC20 {
         lastAdjustmentTimestamp = block.timestamp;
     }
 
+    function setCoinGoldContract(address _coinGold) external onlyOwner {
+        coinGoldContract = _coinGold;
+    }
+
+    function mintFromCoinGold(
+        address to,
+        uint256 amount
+    ) external onlyCoinGold {
+        _mint(to, amount);
+    }
+
     function mint(uint256 amount) external onlyOwner {
-        // Mint function for XEHN
+        // Mint function for CoinDollar
         _mint(msg.sender, amount);
     }
 
     function burn(uint256 amount) external onlyOwner {
-        // Burn function for XEHN
+        // Burn function for CoinDollar
         _burn(msg.sender, amount);
     }
+
+     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
+        uint256 totalCapitalizationCoinGold = (getGoldPrice() / 1e8) * coinGold.totalSupply();
+        bool isSupplyTooHigh = totalSupply() > 2 * totalCapitalizationCoinGold;
+        bool isSupplyTooLow = totalSupply() < totalCapitalizationCoinGold;
+
+        upkeepNeeded = isSupplyTooHigh || isSupplyTooLow;
+        return (upkeepNeeded, performData);
+    }
+    
+     function performUpkeep(bytes calldata) external override {
+        adjustSupplyInternal();
+    }
+
+    // Change visibility of adjustSupply to internal and rename to avoid conflict with performUpkeep
+    function adjustSupply() external onlyOwner {
+        adjustSupplyInternal();
+    }
+
 }
