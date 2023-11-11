@@ -6,6 +6,7 @@ import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/interfaces/
 import {CoinDollar} from "./CoinDollar.sol"; // Import the CoinGold token contract
 
 contract CoinGold is ERC20 {
+    uint256 public goldAmtReserveStatement;  // number of grams of gold from monthly statement
     AggregatorV3Interface internal dataFeed; // Chainlink Aggregator for XAU/USD
     address public owner;
 
@@ -28,8 +29,10 @@ contract CoinGold is ERC20 {
     constructor(
         string memory name,
         string memory symbol,
+        uint256 _goldAmtReserveStatement,
         address _dataFeedAddress
     ) ERC20(name, symbol) {
+        goldAmtReserveStatement = _goldAmtReserveStatement;
         dataFeed = AggregatorV3Interface(
             _dataFeedAddress
         );
