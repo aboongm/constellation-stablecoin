@@ -60,6 +60,10 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         return uint256(price);
     }
 
+    function getGoldCoinTotalCapitalization() external view returns (uint256) {
+        return coinGold.totalCapitalization();
+    }
+
    function adjustSupplyInternal() internal {
         // Calculate the change in the value of gold and adjust supply accordingly
         uint256 currentGoldPrice = uint256(getGoldPrice());
