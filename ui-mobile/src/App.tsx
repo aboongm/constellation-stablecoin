@@ -35,12 +35,10 @@ import {
   aurora,
 } from 'wagmi/chains';
 import { ENV_PROJECT_ID, ENV_SENTRY_DSN } from '@env';
-import { SignMessage } from './views/SignMessage';
-import { SendTransaction } from './views/SendTransaction';
-import { ReadContract } from './views/ReadContract';
 
 
 import Balances from './views/Balances';
+import Transfer from './views/Transfer';
 
 if (!__DEV__ && ENV_SENTRY_DSN) {
   Sentry.init({
@@ -101,36 +99,17 @@ function App(): JSX.Element {
     <WagmiConfig config={wagmiConfig}>
       <SafeAreaView style={[styles.container, isDarkMode && styles.dark]}>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <View style={{...styles.container, flex: 3}}>
-          <Text style={{...styles.title, color: "gold", fontWeight: "900"}} variant="large-600">
+        <View style={{ ...styles.container, flex: 3 }}>
+          <Text style={{ ...styles.title, color: "gold", fontWeight: "900" }} variant="large-600">
             Gold Backed Stablecoin
           </Text>
-          <Text style={{...styles.subTitle, color: "#00aaff", fontWeight: "900"}} variant="large-400">
+          <Text style={{ ...styles.subTitle, color: "#00aaff", fontWeight: "900" }} variant="large-400">
             Constellation Hackathon
           </Text>
         </View>
 
-        <View style={{...styles.container, flex: 5}}>
-          <Balances />
-        </View>
-
-        <View style={{...styles.container, flex: 4 }}>
-          <View style={styles.buttonContainer}>
-            <Text style={styles.button} variant="large-600">
-              Transfer CoinGold
-            </Text>
-            <Text style={styles.button} variant="large-600">
-              Transfer CoinDollar
-            </Text>
-          </View>
-        </View>
-        {/* <FlexView style={styles.buttonContainer}>
-          <W3mButton balance="show" />
-          <SignMessage />
-          <SendTransaction />
-          <ReadContract />
-        </FlexView> */}
-        
+        <Balances />
+        <Transfer />
         <Web3Modal />
       </SafeAreaView>
     </WagmiConfig>
@@ -146,17 +125,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     borderWidth: 1,
-    borderColor: "lightblue",
-    gap: 14
-  },
-  
-  buttonContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: 'flex-end',
-    gap: 10,
-    width: "100%",
-    paddingBottom: 20
+    borderColor: "#dddddd",
+    gap: 14,
+    borderRadius: 20,
+    // Shadow properties for iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    // Elevation for Android
+    elevation: 4,
   },
   dark: {
     backgroundColor: '#141414',
@@ -167,15 +145,6 @@ const styles = StyleSheet.create({
   subTitle: {
     fontSize: 20,
   },
- 
-  button: {
-    padding: 10, 
-    backgroundColor: '#00aaff', 
-    width: "100%", 
-    textAlign: 'center',
-    color: "#fff",
-    borderRadius: 6
-  }
 });
 
 export default App;
