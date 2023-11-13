@@ -10,7 +10,7 @@ export function SignMessage() {
   const {isConnected} = useAccount();
 
   const {data, isError, isLoading, isSuccess, signMessage} = useSignMessage({
-    message: 'hello web3modal + wagmi',
+    message: 'Something went wrong!',
   });
 
   const onPress = () => {

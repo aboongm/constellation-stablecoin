@@ -1,9 +1,11 @@
 import '@walletconnect/react-native-compat';
 import React from 'react';
 import {
+  Image,
   SafeAreaView,
   StatusBar,
   StyleSheet,
+  View,
   useColorScheme,
 } from 'react-native';
 import {
@@ -12,12 +14,13 @@ import {
   Web3Modal,
   W3mButton,
 } from '@web3modal/wagmi-react-native';
-import {FlexView, Text} from '@web3modal/ui-react-native';
+import { FlexView, Text } from '@web3modal/ui-react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import * as Sentry from '@sentry/react-native';
 
-import {WagmiConfig} from 'wagmi';
+import { WagmiConfig } from 'wagmi';
 import {
+  sepolia,
   arbitrum,
   mainnet,
   polygon,
@@ -31,10 +34,13 @@ import {
   celo,
   aurora,
 } from 'wagmi/chains';
-import {ENV_PROJECT_ID, ENV_SENTRY_DSN} from '@env';
-import {SignMessage} from './views/SignMessage';
-import {SendTransaction} from './views/SendTransaction';
-import {ReadContract} from './views/ReadContract';
+import { ENV_PROJECT_ID, ENV_SENTRY_DSN } from '@env';
+import { SignMessage } from './views/SignMessage';
+import { SendTransaction } from './views/SendTransaction';
+import { ReadContract } from './views/ReadContract';
+
+
+import Balances from './views/Balances';
 
 if (!__DEV__ && ENV_SENTRY_DSN) {
   Sentry.init({
@@ -63,6 +69,7 @@ const clipboardClient = {
 };
 
 const chains = [
+  sepolia,
   mainnet,
   polygon,
   avalanche,
@@ -77,7 +84,7 @@ const chains = [
   aurora,
 ];
 
-const wagmiConfig = defaultWagmiConfig({chains, projectId, metadata});
+const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
 
 // 3. Create modal
 createWeb3Modal({
@@ -94,15 +101,36 @@ function App(): JSX.Element {
     <WagmiConfig config={wagmiConfig}>
       <SafeAreaView style={[styles.container, isDarkMode && styles.dark]}>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <Text style={styles.title} variant="large-600">
-          Web3Modal + wagmi + me
-        </Text>
-        <FlexView style={styles.buttonContainer}>
+        <View style={{...styles.container, flex: 3}}>
+          <Text style={{...styles.title, color: "gold", fontWeight: "900"}} variant="large-600">
+            Gold Backed Stablecoin
+          </Text>
+          <Text style={{...styles.subTitle, color: "#00aaff", fontWeight: "900"}} variant="large-400">
+            Constellation Hackathon
+          </Text>
+        </View>
+
+        <View style={{...styles.container, flex: 5}}>
+          <Balances />
+        </View>
+
+        <View style={{...styles.container, flex: 4 }}>
+          <View style={styles.buttonContainer}>
+            <Text style={styles.button} variant="large-600">
+              Transfer CoinGold
+            </Text>
+            <Text style={styles.button} variant="large-600">
+              Transfer CoinDollar
+            </Text>
+          </View>
+        </View>
+        {/* <FlexView style={styles.buttonContainer}>
           <W3mButton balance="show" />
           <SignMessage />
           <SendTransaction />
           <ReadContract />
-        </FlexView>
+        </FlexView> */}
+        
         <Web3Modal />
       </SafeAreaView>
     </WagmiConfig>
@@ -111,21 +139,43 @@ function App(): JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "lightblue",
+    gap: 14
   },
+  
   buttonContainer: {
-    gap: 4,
+    flex: 1,
+    alignItems: "center",
+    justifyContent: 'flex-end',
+    gap: 10,
+    width: "100%",
+    paddingBottom: 20
   },
   dark: {
     backgroundColor: '#141414',
   },
   title: {
-    marginBottom: 40,
-    fontSize: 30,
+    fontSize: 28,
   },
+  subTitle: {
+    fontSize: 20,
+  },
+ 
+  button: {
+    padding: 10, 
+    backgroundColor: '#00aaff', 
+    width: "100%", 
+    textAlign: 'center',
+    color: "#fff",
+    borderRadius: 6
+  }
 });
 
 export default App;
