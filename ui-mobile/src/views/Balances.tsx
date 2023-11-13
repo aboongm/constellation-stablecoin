@@ -53,6 +53,7 @@ const Balances = () => {
   },  [isConnected, coinGoldToken.isSuccess, coinGoldToken.data, coinDollarToken.isSuccess, coinDollarToken.data]);
 
   return isConnected ? (
+    <View style={{...styles.container, flex: 5}}>
     <View style={styles.textContainer}>
       <View>
         <Text style={styles.text}>Address:</Text>
@@ -79,17 +80,39 @@ const Balances = () => {
         </View>
       </View>
     </View>
+    </View>
   ) : (
     // JSX for when not connected
+    <View style={{...styles.container, flex: 5}}>
     <FlexView style={styles.buttonContainer}>
       <W3mButton balance="show" />
     </FlexView>
+    </View>
   );
 };
 
 export default Balances;
 
 const styles = StyleSheet.create({
+    container: {
+        width: '100%',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fff',
+        padding: 20,
+        borderWidth: 1,
+        borderColor: "#dddddd",
+        gap: 14,
+        borderRadius: 20,
+        // Shadow properties for iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        // Elevation for Android
+        elevation: 4,
+      },
   buttonContainer: {
     flex: 1,
     alignItems: 'center',
