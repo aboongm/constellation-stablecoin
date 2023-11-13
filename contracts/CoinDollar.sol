@@ -17,12 +17,12 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
 
     uint256 public lastGoldPrice;
 
-    address public coinGoldContract; // Address of the CoinGold contract
+    // address public coinGoldContract; // Address of the CoinGold contract
 
     event ExchangeGoldToDollar(address indexed from, uint256 amount);
 
     modifier onlyCoinGold() {
-        require(msg.sender == coinGoldContract, "Caller is not CoinGold");
+        require(msg.sender == address(coinGold), "Caller is not CoinGold");
         _;
     }
 
@@ -64,6 +64,25 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         return coinGold.totalCapitalization();
     }
 
+    function transferCoinGoldFromUser(address user, address recipient, uint256 amount) external {
+        coinGold.transferFromUser(user, recipient, amount);
+    }
+
+    function mintCoinGold(uint256 gramsOfGold) external {
+        // Only call this if CoinDollar contract is authorized to mint CoinGold
+        coinGold.mintCoinGold(gramsOfGold);
+    }
+
+    function burnCoinGold(uint256 amount) external {
+        // Only call this if CoinDollar contract is authorized to burn CoinGold
+        coinGold.burnCoinGold(amount);
+    }
+
+    function transferCoinGold(address to, uint256 amount) external {
+        // Only call this if CoinDollar contract is authorized to transfer CoinGold
+        coinGold.transferCoinGold(to, amount);
+    }
+
    function adjustSupplyInternal() internal {
         // Calculate the change in the value of gold and adjust supply accordingly
         uint256 currentGoldPrice = uint256(getGoldPrice());
@@ -99,38 +118,38 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         lastAdjustmentTimestamp = block.timestamp;
     }
 
-    CoinDollar public coinDollar;
+    // CoinDollar public coinDollar;
 
-    function setCoinGoldContract(address _coinGold) external onlyOwner {
+    /* function setCoinGoldContract(address _coinGold) external onlyOwner {
         coinGoldContract = _coinGold;
-    }
+    } */
 
-    function mintFromCoinGold(
+    /* function mintFromCoinGold(
         address to,
         uint256 amount
     ) external onlyCoinGold {
         _mint(to, amount);
-    }
+    } */
 
     /* function setCoinDollarContract(address _coinDollar) external onlyOwner {
         coinDollar = CoinDollar(_coinDollar);
-    } */
-     
+    } */ 
+    
 
-    /* function exchangeGoldToDollar(uint256 amount) public {
-        require(balanceOf(msg.sender) >= amount, "Insufficient CoinGold balance");
+    function exchangeGoldToDollar(uint256 coinGoldAmount) public {
+        require(coinGold.balanceOf(msg.sender) >= coinGoldAmount, "Insufficient CoinGold balance");
 
-        // Burn CoinGold
-        _burn(msg.sender, amount);
+        // Transfer CoinGold from the user to this contract
+        coinGold.transferFromUser(msg.sender, address(this), coinGoldAmount);
 
-        // Calculate the amount of CoinDollar to mint
-        uint256 coinDollarAmount = calculateCoinDollarAmount(amount);
+        // Calculate the equivalent amount of CoinDollar
+        uint256 coinDollarAmount = calculateCoinDollarAmount(coinGoldAmount);
 
-        // Mint CoinDollar
-        coinDollar.mintFromCoinGold(msg.sender, coinDollarAmount);
+        // Transfer CoinDollar to the user
+        transfer(msg.sender, coinDollarAmount);
 
-        emit ExchangeGoldToDollar(msg.sender, amount);
-    } */
+        emit ExchangeGoldToDollar(msg.sender, coinGoldAmount);
+    }
 
     // Function to calculate the amount of CoinDollar based on the amount of CoinGold
     function calculateCoinDollarAmount(uint256 coinGoldAmount) private view returns (uint256) {
@@ -152,7 +171,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         _burn(msg.sender, amount);
     }
 
-     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
+    function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
         uint256 totalCapitalizationCoinGold = (getGoldPrice() / 1e8) * coinGold.totalSupply();
         bool isSupplyTooHigh = totalSupply() > 2 * totalCapitalizationCoinGold;
         bool isSupplyTooLow = totalSupply() < totalCapitalizationCoinGold;
@@ -168,6 +187,11 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
     // Change visibility of adjustSupply to internal and rename to avoid conflict with performUpkeep
     function adjustSupply() external onlyOwner {
         adjustSupplyInternal();
+    }
+
+    function transferCoinDollar(address to, uint256 amount) public returns (bool) {
+        _transfer(msg.sender, to, amount);
+        return true;
     }
 
 }

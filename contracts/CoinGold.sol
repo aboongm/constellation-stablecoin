@@ -9,6 +9,8 @@ contract CoinGold is ERC20 {
     AggregatorV3Interface internal dataFeed; // Chainlink Aggregator for XAU/USD
     address public owner;
 
+    address private coinDollar;
+
     // Events
     event Mint(address indexed to, uint256 amount);
     event Burn(address indexed from, uint256 amount);
@@ -50,8 +52,8 @@ contract CoinGold is ERC20 {
     function mintCoinGold(uint256 gramsOfGold) external onlyOwner {
         // Mint the corresponding CoinGold tokens directly based on gramsOfGold
         require(gramsOfGold > 0, "Mint amount must be greater than zero");
-        _mint(msg.sender, gramsOfGold);
-        emit Mint(msg.sender, gramsOfGold); // Emit the Mint event here
+        _mint(msg.sender, gramsOfGold * 1e18);
+        emit Mint(msg.sender, gramsOfGold * 1e18); // Emit the Mint event here
     }
 
     // Burn CoinGold tokens when required, only callable by the ow0x80aC9A24c136cc2E722521f899951F6065aAB77aner
@@ -62,8 +64,8 @@ contract CoinGold is ERC20 {
         require(balanceOf(msg.sender) >= amount, "Insufficient CoinGold balance");
 
         // Implement the burning mechanism
-        _burn(msg.sender, amount);
-         emit Burn(msg.sender, amount); // Emit the Burn event here
+        _burn(msg.sender, amount * 1e18);
+         emit Burn(msg.sender, amount * 1e18); // Emit the Burn event here
     }
 
     // Calculate the total capitalization of the tokens
@@ -78,5 +80,17 @@ contract CoinGold is ERC20 {
     }
     
     // Add other functions and modifiers as needed to meet your requirements
-    
+    function setCoinDollarAddress(address _coinDollar) external onlyOwner{
+        coinDollar=_coinDollar;
+    }
+
+    function transferFromUser(address user, address recipient, uint256 amount) external {
+        require(msg.sender == coinDollar, "Unauthorized");
+        _transfer(user, recipient, amount);
+    }
+
+     function transferCoinGold(address to, uint256 amount) public returns (bool) {
+        _transfer(msg.sender, to, amount);
+        return true;
+    }
 }

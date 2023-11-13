@@ -7,7 +7,7 @@ async function main() {
   // Example parameters for the CoinGold constructor
   const name = "CoinDollar";
   const symbol = "CNDO";
-  const coinGoldAddress = "0xc001b21Ee181614Bb167120a63f17D3A37d755a8";
+  const coinGoldAddress = "0x628a290dF6B99a17593168460a269643A0D7BD5F";
   const _dataFeedAddress = "0xC5981F461d74c46eB4b0CF3f4Ec79f025573B0Ea";
   // Deploy the CoinGold contract with the specified parameters
   const CoinDollar = await ethers.getContractFactory("CoinDollar");
