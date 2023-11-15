@@ -5,6 +5,9 @@ import cndo from '../../assets/images/cndo_icon.png';
 import { W3mButton, useWeb3Modal } from '@web3modal/wagmi-react-native';
 import { FlexView } from '@web3modal/ui-react-native';
 import { useAccount, useToken } from 'wagmi';
+import { publicClient } from '../utils/client';
+import abiCoinGold from "../../abi/abi-CoinGold.json"
+import abiCoinDollar from "../../abi/abi-CoinDollar.json"
 
 const tokenContracts = {
   CoinGold: '0x628a290dF6B99a17593168460a269643A0D7BD5F',
@@ -12,73 +15,129 @@ const tokenContracts = {
   // Add more tokens as needed
 };
 
-const Balances = () => {
-  const { isConnected } = useAccount();
+export const Balances = () => {
+  const { address: accountAddress, isConnected } = useAccount();
   const { open } = useWeb3Modal();
-  const [tokenBalances, setTokenBalances] = useState<{ [key: string]: string }>({});
+  const [tokenSupply, setTokenSupply] = useState<{ [key: string]: string }>({});
+  const [coinGoldBalance, setCoinGoldBalance] = useState<string>('0');
+  const [coinDollarBalance, setCoinDollarBalance] = useState<string>('0');
 
   const coinGoldToken = useToken({ address: tokenContracts.CoinGold });
-//   console.log('coinGoldToken', coinGoldToken);
 
   const coinDollarToken = useToken({ address: tokenContracts.CoinDollar });
-//   console.log('coinDollarToken', coinDollarToken);
 
   useEffect(() => {
-    console.log('tokenBalances: ', tokenBalances);
 
-    const fetchTokenBalances = async () => {
+    const fetchTokenSupply = async () => {
       try {
-        const balances: { [key: string]: string } = {};
+        const supply: { [key: string]: string } = {};
 
         if (coinGoldToken.isSuccess) {
-          balances.CoinGold = coinGoldToken.data.totalSupply.formatted;
+          supply.CoinGold = coinGoldToken.data.totalSupply.formatted;
         }
 
         if (coinDollarToken.isSuccess) {
-          balances.CoinDollar = coinDollarToken.data.totalSupply.formatted;
+          supply.CoinDollar = coinDollarToken.data.totalSupply.formatted;
         }
-        console.log("balances", balances);
+
+        const balanceCoinGold  = await publicClient.readContract({
+          address: tokenContracts.CoinGold,
+          abi: abiCoinGold.abi,
+          functionName: 'balanceOf',
+          args: [accountAddress]
+        })
+
+        const balanceCoinDollar  = await publicClient.readContract({
+          address: tokenContracts.CoinDollar,
+          abi: abiCoinDollar.abi,
+          functionName: 'balanceOf',
+          args: [accountAddress]
+        })
+
         
-        setTokenBalances(balances);
+        if (balanceCoinGold ) {
+          const humanReadableCoinGoldBalance = (parseFloat(balanceCoinGold) / 1e18).toFixed(4)
+          setCoinGoldBalance(humanReadableCoinGoldBalance.toString());
+        }
+        if (balanceCoinDollar ) {
+          const humanReadableCoinDollarBalance = (parseFloat(balanceCoinDollar) / 1e18).toFixed(4)
+          setCoinDollarBalance(humanReadableCoinDollarBalance.toString())
+        }
+        // console.log("supply: ", supply);
+        
+        setTokenSupply(supply);
       } catch (error) {
-        console.error('Error fetching token balances:', error);
+        console.error('Error fetching token supply:', error);
       }
     };
 
     if (isConnected) {
-      fetchTokenBalances();
+      fetchTokenSupply();
     }
 
-    console.log('tokenBalances later: ', tokenBalances);
-  },  [isConnected, coinGoldToken.isSuccess, coinGoldToken.data, coinDollarToken.isSuccess, coinDollarToken.data]);
+  },  [isConnected, coinGoldToken.isSuccess, coinGoldToken.data, coinDollarToken.isSuccess, coinDollarToken.data, accountAddress]);
 
   return isConnected ? (
-    <View style={{...styles.container, flex: 5}}>
+    <View style={{...styles.container, flex: 6}}>
     <View style={styles.textContainer}>
-      <View>
-        <Text style={styles.text}>Address:</Text>
-        <Text style={{ ...styles.text, marginBottom: 10 }} variant="large-600">
-          <FlexView style={styles.buttonContainer}>
-            <W3mButton balance="show" />
-          </FlexView>
-        </Text>
-      </View>
-      <View>
-        <Text style={styles.text}>CoinGold Balance:</Text>
-        <View style={styles.coin}>
-          <Image source={cngd} style={styles.image} />
-          <Text style={styles.text}>{tokenBalances.CoinGold}</Text>
-          <Text style={styles.text}>CNGD</Text>
+    <View style={{borderWidth: 1}}>
+        <View>
+          <Text style={styles.text}>CoinGold Address:</Text>
+          <View style={styles.coin}>
+            <Text style={styles.text}>{tokenContracts.CoinGold}</Text>
+          </View>
         </View>
-      </View>
-      <View>
-        <Text style={styles.text}>CoinDollar Balance:</Text>
-        <View style={styles.coin}>
-          <Image source={cndo} style={styles.image} />
-          <Text style={styles.text}>{tokenBalances.CoinDollar}</Text>
-          <Text style={styles.text}>CNDO</Text>
+        <View>
+          <Text style={styles.text}> CoinGoldTotalSupply:</Text>
+          <View style={styles.coin}>
+            <Image source={cndo} style={styles.image} />
+            <Text style={styles.text}>{tokenSupply.CoinGold}</Text>
+            <Text style={styles.text}>CNGD</Text>
+          </View>
         </View>
-      </View>
+      </View> 
+
+      <View style={{borderWidth: 1}}>
+        <View>
+          <Text style={styles.text}>CoinDollar Address:</Text>
+          <View style={styles.coin}>
+            <Text style={styles.text}>{tokenContracts.CoinDollar}</Text>
+          </View>
+        </View>
+        <View>
+          <Text style={styles.text}>CoinDollar TotalSupply:</Text>
+          <View style={styles.coin}>
+            <Image source={cndo} style={styles.image} />
+            <Text style={styles.text}>{tokenSupply.CoinDollar}</Text>
+            <Text style={styles.text}>CNDO</Text>
+          </View>
+        </View>
+      </View> 
+
+      <View style={{borderWidth: 1}}>
+        <View>
+          <Text style={styles.text}>NativeCoin Address & Balance:</Text>
+            <FlexView style={styles.buttonContainer}>
+              <W3mButton balance="show" />
+            </FlexView>
+          </View>
+        <View>
+          <Text style={styles.text}>CoinGold Balance:</Text>
+          <View style={styles.coin}>
+            <Image source={cngd} style={styles.image} />
+            <Text style={styles.text}>{coinGoldBalance}</Text>
+            <Text style={styles.text}>CNGD</Text>
+          </View>
+        </View>
+        <View>
+          <Text style={styles.text}>CoinDollar Balance:</Text>
+          <View style={styles.coin}>
+            <Image source={cndo} style={styles.image} />
+            <Text style={styles.text}>{coinDollarBalance}</Text>
+            <Text style={styles.text}>CNDO</Text>
+          </View>
+        </View>
+      </View>      
     </View>
     </View>
   ) : (
@@ -91,7 +150,7 @@ const Balances = () => {
   );
 };
 
-export default Balances;
+// export default supply;
 
 const styles = StyleSheet.create({
     container: {
@@ -114,12 +173,9 @@ const styles = StyleSheet.create({
         elevation: 4,
       },
   buttonContainer: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 10,
+    justifyContent: 'center',
     width: '100%',
-    paddingBottom: 20,
   },
   textContainer: {
     width: '100%',
