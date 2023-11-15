@@ -38,8 +38,8 @@ import {
 import { ENV_PROJECT_ID, ENV_SENTRY_DSN } from '@env';
 
 
-import {Balances} from './views/Balances';
-import {Transfer} from './views/Transfer';
+import { Balances } from './views/Balances';
+import { Transfer } from './views/Transfer';
 
 if (!__DEV__ && ENV_SENTRY_DSN) {
   Sentry.init({
@@ -93,7 +93,7 @@ createWeb3Modal({
   clipboardClient,
 });
 
-export function App(): JSX.Element {
+function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
@@ -150,4 +150,4 @@ const styles = StyleSheet.create({
   },
 });
 
-// export default App;
+export default App;

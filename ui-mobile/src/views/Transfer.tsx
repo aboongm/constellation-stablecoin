@@ -4,7 +4,7 @@ import { useAccount, useSendTransaction } from 'wagmi';
 import { Button } from '@web3modal/ui-react-native';
 import { parseEther } from 'viem/utils';
 
-const Transfer = () => {
+export const Transfer = () => {
   const [requestModalVisible, setRequetsModalVisible] = useState(false);
   const { isConnected } = useAccount();
   const [toAddress, setToAddress] = useState('');
@@ -47,7 +47,7 @@ const Transfer = () => {
   ) : null;
 };
 
-export default Transfer;
+// export default Transfer;
 
 const styles = StyleSheet.create({
   container: {
