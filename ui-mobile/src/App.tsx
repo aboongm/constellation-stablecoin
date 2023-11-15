@@ -100,19 +100,21 @@ function App(): JSX.Element {
     <WagmiConfig config={wagmiConfig}>
       <SafeAreaView style={[styles.container, isDarkMode && styles.dark]}>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <ScrollView>
-          <View style={{ ...styles.container, flex: 3 }}>
-            <Text style={{ ...styles.title, color: "gold", fontWeight: "900" }} variant="large-600">
-              Gold Backed Stablecoin
-            </Text>
-            <Text style={{ ...styles.subTitle, color: "#00aaff", fontWeight: "900" }} variant="large-400">
-              Constellation Hackathon
-            </Text>
-          </View>
+        <ScrollView style={{flex: 1, width: "100%"}} >
+          <View style={styles.groupContainer}>
+            <View style={{ ...styles.container, flex: 3, alignItems: 'center' }}>
+              <Text style={{ ...styles.title, color: "#736f6f", fontWeight: "900" }} variant="large-600">
+                Gold Backed Stablecoin
+              </Text>
+              <Text style={{ ...styles.subTitle, color: "#979797", fontWeight: "900" }} variant="large-400">
+                Constellation Hackathon
+              </Text>
+            </View>
 
-          <Balances />
-          <Transfer />
-          <Web3Modal />
+            <Balances />
+            <Transfer />
+          {/* <Web3Modal /> */}
+          </View>
         </ScrollView>
       </SafeAreaView>
     </WagmiConfig>
@@ -123,6 +125,13 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     flex: 1,
+  },
+  dark: {
+    backgroundColor: '#141414',
+  },
+  groupContainer: {
+    width: '100%',
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
@@ -130,7 +139,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#dddddd",
     gap: 14,
-    borderRadius: 20,
+    // borderRadius: 20,
     // Shadow properties for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -138,9 +147,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     // Elevation for Android
     elevation: 4,
-  },
-  dark: {
-    backgroundColor: '#141414',
   },
   title: {
     fontSize: 28,

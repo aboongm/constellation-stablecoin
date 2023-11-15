@@ -80,15 +80,15 @@ export const Balances = () => {
   return isConnected ? (
     <View style={{...styles.container, flex: 6}}>
     <View style={styles.textContainer}>
-    <View style={{borderWidth: 1}}>
+    <View>
         <View>
-          <Text style={styles.text}>CoinGold Address:</Text>
+          <Text style={{...styles.text, fontWeight: "700"}}>CoinGold Address:</Text>
           <View style={styles.coin}>
             <Text style={styles.text}>{tokenContracts.CoinGold}</Text>
           </View>
         </View>
         <View>
-          <Text style={styles.text}> CoinGoldTotalSupply:</Text>
+          <Text style={{...styles.text, fontWeight: "700"}}> CoinGoldTotalSupply:</Text>
           <View style={styles.coin}>
             <Image source={cndo} style={styles.image} />
             <Text style={styles.text}>{tokenSupply.CoinGold}</Text>
@@ -97,15 +97,15 @@ export const Balances = () => {
         </View>
       </View> 
 
-      <View style={{borderWidth: 1}}>
+      <View >
         <View>
-          <Text style={styles.text}>CoinDollar Address:</Text>
+          <Text style={{...styles.text, fontWeight: "700"}}>CoinDollar Address:</Text>
           <View style={styles.coin}>
             <Text style={styles.text}>{tokenContracts.CoinDollar}</Text>
           </View>
         </View>
         <View>
-          <Text style={styles.text}>CoinDollar TotalSupply:</Text>
+          <Text style={{...styles.text, fontWeight: "700"}}>CoinDollar TotalSupply:</Text>
           <View style={styles.coin}>
             <Image source={cndo} style={styles.image} />
             <Text style={styles.text}>{tokenSupply.CoinDollar}</Text>
@@ -114,15 +114,15 @@ export const Balances = () => {
         </View>
       </View> 
 
-      <View style={{borderWidth: 1}}>
+      <View>
         <View>
-          <Text style={styles.text}>NativeCoin Address & Balance:</Text>
+          <Text style={{...styles.text, fontWeight: "700"}}>NativeCoin Address & Balance:</Text>
             <FlexView style={styles.buttonContainer}>
               <W3mButton balance="show" />
             </FlexView>
           </View>
         <View>
-          <Text style={styles.text}>CoinGold Balance:</Text>
+          <Text style={{...styles.text, fontWeight: "700"}}>CoinGold Balance:</Text>
           <View style={styles.coin}>
             <Image source={cngd} style={styles.image} />
             <Text style={styles.text}>{coinGoldBalance}</Text>
@@ -130,7 +130,7 @@ export const Balances = () => {
           </View>
         </View>
         <View>
-          <Text style={styles.text}>CoinDollar Balance:</Text>
+          <Text style={{...styles.text, fontWeight: "700"}}>CoinDollar Balance:</Text>
           <View style={styles.coin}>
             <Image source={cndo} style={styles.image} />
             <Text style={styles.text}>{coinDollarBalance}</Text>
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    color: '#00aaff',
+    color: '#736f6f',
   },
   image: {
     width: 16,
