@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import cngd from '../../assets/images/cngd_icon.png';
 import cndo from '../../assets/images/cndo_icon.png';
 import { W3mButton, useWeb3Modal } from '@web3modal/wagmi-react-native';
@@ -21,10 +21,20 @@ export const Balances = () => {
   const [tokenSupply, setTokenSupply] = useState<{ [key: string]: string }>({});
   const [coinGoldBalance, setCoinGoldBalance] = useState<string>('0');
   const [coinDollarBalance, setCoinDollarBalance] = useState<string>('0');
-
+  const [expandedAddress, setExpandedAddress] = useState<string | null>(null);
   const coinGoldToken = useToken({ address: tokenContracts.CoinGold });
 
   const coinDollarToken = useToken({ address: tokenContracts.CoinDollar });
+
+  
+  const renderAddress = (address: string, token: string) => {
+    if (!address) return '';
+    return expandedAddress === token ? address : `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
+
+  const toggleExpandedAddress = (token: string) => {
+    setExpandedAddress(expandedAddress === token ? null : token);
+  };
 
   useEffect(() => {
 
@@ -63,7 +73,6 @@ export const Balances = () => {
           const humanReadableCoinDollarBalance = (parseFloat(balanceCoinDollar) / 1e18).toFixed(4)
           setCoinDollarBalance(humanReadableCoinDollarBalance.toString())
         }
-        // console.log("supply: ", supply);
         
         setTokenSupply(supply);
       } catch (error) {
@@ -76,16 +85,18 @@ export const Balances = () => {
     }
 
   },  [isConnected, coinGoldToken.isSuccess, coinGoldToken.data, coinDollarToken.isSuccess, coinDollarToken.data, accountAddress]);
-
+  
   return isConnected ? (
     <View style={{...styles.container, flex: 6}}>
     <View style={styles.textContainer}>
     <View>
         <View>
-          <Text style={{...styles.text, fontWeight: "700"}}>CoinGold Address:</Text>
-          <View style={styles.coin}>
-            <Text style={styles.text}>{tokenContracts.CoinGold}</Text>
-          </View>
+          <Text style={{...styles.text,paddingHorizontal: 10, fontWeight: "700"}}>CoinGold Address:</Text>
+           <TouchableWithoutFeedback onPress={() => toggleExpandedAddress('CoinGold')}>
+        <View style={styles.coin}>
+          <Text style={styles.text}>{renderAddress(tokenContracts.CoinGold, 'CoinGold')}</Text>
+        </View>
+      </TouchableWithoutFeedback>
         </View>
         <View>
           <Text style={{...styles.text, fontWeight: "700"}}> CoinGoldTotalSupply:</Text>
@@ -100,9 +111,11 @@ export const Balances = () => {
       <View >
         <View>
           <Text style={{...styles.text, fontWeight: "700"}}>CoinDollar Address:</Text>
-          <View style={styles.coin}>
-            <Text style={styles.text}>{tokenContracts.CoinDollar}</Text>
-          </View>
+           <TouchableWithoutFeedback onPress={() => toggleExpandedAddress('CoinDollar')}>
+        <View style={styles.coin}>
+          <Text style={styles.text}>{renderAddress(tokenContracts.CoinDollar, 'CoinDollar')}</Text>
+        </View>
+      </TouchableWithoutFeedback>
         </View>
         <View>
           <Text style={{...styles.text, fontWeight: "700"}}>CoinDollar TotalSupply:</Text>
@@ -197,5 +210,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginBottom: 10,
+    backgroundColor: "#e5e5e5",
+    borderRadius: 16,
+    paddingVertical: 3,
+    paddingHorizontal: 10
   },
 });
