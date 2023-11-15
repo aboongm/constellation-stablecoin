@@ -26,7 +26,7 @@ export const Balances = () => {
 
   const coinDollarToken = useToken({ address: tokenContracts.CoinDollar });
 
-  
+
   const renderAddress = (address: string, token: string) => {
     if (!address) return '';
     return expandedAddress === token ? address : `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
@@ -50,30 +50,30 @@ export const Balances = () => {
           supply.CoinDollar = coinDollarToken.data.totalSupply.formatted;
         }
 
-        const balanceCoinGold  = await publicClient.readContract({
+        const balanceCoinGold = await publicClient.readContract({
           address: tokenContracts.CoinGold,
           abi: abiCoinGold.abi,
           functionName: 'balanceOf',
           args: [accountAddress]
         })
 
-        const balanceCoinDollar  = await publicClient.readContract({
+        const balanceCoinDollar = await publicClient.readContract({
           address: tokenContracts.CoinDollar,
           abi: abiCoinDollar.abi,
           functionName: 'balanceOf',
           args: [accountAddress]
         })
 
-        
-        if (balanceCoinGold ) {
+
+        if (balanceCoinGold) {
           const humanReadableCoinGoldBalance = (parseFloat(balanceCoinGold) / 1e18).toFixed(4)
           setCoinGoldBalance(humanReadableCoinGoldBalance.toString());
         }
-        if (balanceCoinDollar ) {
+        if (balanceCoinDollar) {
           const humanReadableCoinDollarBalance = (parseFloat(balanceCoinDollar) / 1e18).toFixed(4)
           setCoinDollarBalance(humanReadableCoinDollarBalance.toString())
         }
-        
+
         setTokenSupply(supply);
       } catch (error) {
         console.error('Error fetching token supply:', error);
@@ -84,81 +84,81 @@ export const Balances = () => {
       fetchTokenSupply();
     }
 
-  },  [isConnected, coinGoldToken.isSuccess, coinGoldToken.data, coinDollarToken.isSuccess, coinDollarToken.data, accountAddress]);
-  
+  }, [isConnected, coinGoldToken.isSuccess, coinGoldToken.data, coinDollarToken.isSuccess, coinDollarToken.data, accountAddress]);
+
   return isConnected ? (
-    <View style={{...styles.container, flex: 6}}>
-    <View style={styles.textContainer}>
-    <View>
+    <View style={{ ...styles.container, flex: 6 }}>
+      <View style={styles.textContainer}>
         <View>
-          <Text style={{...styles.text,paddingHorizontal: 10, fontWeight: "700"}}>CoinGold Address:</Text>
-           <TouchableWithoutFeedback onPress={() => toggleExpandedAddress('CoinGold')}>
-        <View style={styles.coin}>
-          <Text style={styles.text}>{renderAddress(tokenContracts.CoinGold, 'CoinGold')}</Text>
-        </View>
-      </TouchableWithoutFeedback>
-        </View>
-        <View>
-          <Text style={{...styles.text, fontWeight: "700"}}> CoinGoldTotalSupply:</Text>
-          <View style={styles.coin}>
-            <Image source={cndo} style={styles.image} />
-            <Text style={styles.text}>{tokenSupply.CoinGold}</Text>
-            <Text style={styles.text}>CNGD</Text>
-          </View>
-        </View>
-      </View> 
-
-      <View >
-        <View>
-          <Text style={{...styles.text, fontWeight: "700"}}>CoinDollar Address:</Text>
-           <TouchableWithoutFeedback onPress={() => toggleExpandedAddress('CoinDollar')}>
-        <View style={styles.coin}>
-          <Text style={styles.text}>{renderAddress(tokenContracts.CoinDollar, 'CoinDollar')}</Text>
-        </View>
-      </TouchableWithoutFeedback>
-        </View>
-        <View>
-          <Text style={{...styles.text, fontWeight: "700"}}>CoinDollar TotalSupply:</Text>
-          <View style={styles.coin}>
-            <Image source={cndo} style={styles.image} />
-            <Text style={styles.text}>{tokenSupply.CoinDollar}</Text>
-            <Text style={styles.text}>CNDO</Text>
-          </View>
-        </View>
-      </View> 
-
-      <View>
-        <View>
-          <Text style={{...styles.text, fontWeight: "700"}}>NativeCoin Address & Balance:</Text>
+          <View style={{marginBottom: 10}}>
+            <Text style={{ ...styles.text, fontWeight: "700" }}>NativeCoin Address & Balance:</Text>
             <FlexView style={styles.buttonContainer}>
               <W3mButton balance="show" />
             </FlexView>
           </View>
-        <View>
-          <Text style={{...styles.text, fontWeight: "700"}}>CoinGold Balance:</Text>
-          <View style={styles.coin}>
-            <Image source={cngd} style={styles.image} />
-            <Text style={styles.text}>{coinGoldBalance}</Text>
-            <Text style={styles.text}>CNGD</Text>
+          <View>
+            <Text style={{ ...styles.text, paddingHorizontal: 10, fontWeight: "700" }}>CoinGold Address:</Text>
+            <TouchableWithoutFeedback onPress={() => toggleExpandedAddress('CoinGold')}>
+              <View style={styles.coin}>
+                <Text style={styles.text}>{renderAddress(tokenContracts.CoinGold, 'CoinGold')}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+          <View>
+            <Text style={{ ...styles.text, fontWeight: "700" }}> CoinGoldTotalSupply:</Text>
+            <View style={styles.coin}>
+              <Image source={cndo} style={styles.image} />
+              <Text style={styles.text}>{tokenSupply.CoinGold}</Text>
+              <Text style={styles.text}>CNGD</Text>
+            </View>
           </View>
         </View>
-        <View>
-          <Text style={{...styles.text, fontWeight: "700"}}>CoinDollar Balance:</Text>
-          <View style={styles.coin}>
-            <Image source={cndo} style={styles.image} />
-            <Text style={styles.text}>{coinDollarBalance}</Text>
-            <Text style={styles.text}>CNDO</Text>
+
+        <View >
+          <View>
+            <Text style={{ ...styles.text, fontWeight: "700" }}>CoinDollar Address:</Text>
+            <TouchableWithoutFeedback onPress={() => toggleExpandedAddress('CoinDollar')}>
+              <View style={styles.coin}>
+                <Text style={styles.text}>{renderAddress(tokenContracts.CoinDollar, 'CoinDollar')}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+          <View>
+            <Text style={{ ...styles.text, fontWeight: "700" }}>CoinDollar TotalSupply:</Text>
+            <View style={styles.coin}>
+              <Image source={cndo} style={styles.image} />
+              <Text style={styles.text}>{tokenSupply.CoinDollar}</Text>
+              <Text style={styles.text}>CNDO</Text>
+            </View>
           </View>
         </View>
-      </View>      
-    </View>
+
+        <View>
+          <View>
+            <Text style={{ ...styles.text, fontWeight: "700" }}>CoinGold Balance:</Text>
+            <View style={styles.coin}>
+              <Image source={cngd} style={styles.image} />
+              <Text style={styles.text}>{coinGoldBalance}</Text>
+              <Text style={styles.text}>CNGD</Text>
+            </View>
+          </View>
+          <View>
+            <Text style={{ ...styles.text, fontWeight: "700" }}>CoinDollar Balance:</Text>
+            <View style={styles.coin}>
+              <Image source={cndo} style={styles.image} />
+              <Text style={styles.text}>{coinDollarBalance}</Text>
+              <Text style={styles.text}>CNDO</Text>
+            </View>
+          </View>
+        </View>
+      </View>
     </View>
   ) : (
     // JSX for when not connected
-    <View style={{...styles.container, flex: 5}}>
-    <FlexView style={styles.buttonContainer}>
-      <W3mButton balance="show" />
-    </FlexView>
+    <View style={{ ...styles.container, flex: 5 }}>
+      <FlexView style={styles.buttonContainer}>
+        <W3mButton balance="show" />
+      </FlexView>
     </View>
   );
 };
@@ -166,25 +166,25 @@ export const Balances = () => {
 // export default supply;
 
 const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#fff',
-        padding: 20,
-        borderWidth: 1,
-        borderColor: "#dddddd",
-        gap: 14,
-        borderRadius: 20,
-        // Shadow properties for iOS
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        // Elevation for Android
-        elevation: 4,
-      },
+  container: {
+    width: '100%',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#dddddd",
+    gap: 14,
+    borderRadius: 20,
+    // Shadow properties for iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    // Elevation for Android
+    elevation: 4,
+  },
   buttonContainer: {
     alignItems: 'center',
     justifyContent: 'center',

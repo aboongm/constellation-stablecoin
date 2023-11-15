@@ -113,7 +113,7 @@ function App(): JSX.Element {
 
             <Balances />
             <Transfer />
-          {/* <Web3Modal /> */}
+          <Web3Modal />
           </View>
         </ScrollView>
       </SafeAreaView>

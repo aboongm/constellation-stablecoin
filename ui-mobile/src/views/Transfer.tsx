@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: '#dddddd',
-    gap: 14,
+    gap: 10,
     borderRadius: 20,
     // Shadow properties for iOS
     shadowColor: '#000',
@@ -106,8 +106,9 @@ const styles = StyleSheet.create({
 
   input: {
     height: 40,
-    padding: 10,
-    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: '#dddddd',
   },
@@ -123,10 +124,10 @@ const styles = StyleSheet.create({
 
   button: {
     padding: 10,
-    backgroundColor: '#00aaff',
+    backgroundColor: '#127dcb',
     width: '100%',
     textAlign: 'center',
     color: 'white',
-    borderRadius: 6,
+    borderRadius: 25,
   },
 });
