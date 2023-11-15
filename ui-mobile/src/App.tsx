@@ -3,6 +3,7 @@ import React from 'react';
 import {
   Image,
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   View,
@@ -37,8 +38,8 @@ import {
 import { ENV_PROJECT_ID, ENV_SENTRY_DSN } from '@env';
 
 
-import Balances from './views/Balances';
-import Transfer from './views/Transfer';
+import {Balances} from './views/Balances';
+import {Transfer} from './views/Transfer';
 
 if (!__DEV__ && ENV_SENTRY_DSN) {
   Sentry.init({
@@ -92,25 +93,27 @@ createWeb3Modal({
   clipboardClient,
 });
 
-function App(): JSX.Element {
+export function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
     <WagmiConfig config={wagmiConfig}>
       <SafeAreaView style={[styles.container, isDarkMode && styles.dark]}>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <View style={{ ...styles.container, flex: 3 }}>
-          <Text style={{ ...styles.title, color: "gold", fontWeight: "900" }} variant="large-600">
-            Gold Backed Stablecoin
-          </Text>
-          <Text style={{ ...styles.subTitle, color: "#00aaff", fontWeight: "900" }} variant="large-400">
-            Constellation Hackathon
-          </Text>
-        </View>
+        <ScrollView>
+          <View style={{ ...styles.container, flex: 3 }}>
+            <Text style={{ ...styles.title, color: "gold", fontWeight: "900" }} variant="large-600">
+              Gold Backed Stablecoin
+            </Text>
+            <Text style={{ ...styles.subTitle, color: "#00aaff", fontWeight: "900" }} variant="large-400">
+              Constellation Hackathon
+            </Text>
+          </View>
 
-        <Balances />
-        <Transfer />
-        <Web3Modal />
+          <Balances />
+          <Transfer />
+          <Web3Modal />
+        </ScrollView>
       </SafeAreaView>
     </WagmiConfig>
   );
@@ -147,4 +150,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+// export default App;
