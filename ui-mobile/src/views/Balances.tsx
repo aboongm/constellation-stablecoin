@@ -91,7 +91,7 @@ export const Balances = () => {
       <View style={styles.textContainer}>
         <View>
           <View style={{marginBottom: 10}}>
-            <Text style={{ ...styles.text, fontWeight: "700" }}>NativeCoin Address & Balance:</Text>
+            <Text style={{ ...styles.text, fontWeight: "700" }}>NativeCoin:</Text>
             <FlexView style={styles.buttonContainer}>
               <W3mButton balance="show" />
             </FlexView>

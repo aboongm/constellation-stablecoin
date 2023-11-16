@@ -9,6 +9,7 @@ import {
 import { Button } from '@web3modal/ui-react-native';
 import { parseEther } from 'viem/utils';
 import { useDebounce } from 'use-debounce';
+import { transferTokens } from '../utils/interact';
 
 export const Transfer = () => {
   const [requestModalVisible, setRequestModalVisible] = useState(false);
@@ -23,13 +24,16 @@ export const Transfer = () => {
   const [scanning, setScanning] = useState(false);
   const [scannedAddress, setScannedAddress] = useState('');
 
-  useEffect(() => {
-    if (scannedAddress) {
-      setToAddress(scannedAddress);
-      setScannedAddress('');
-      setScanning(false);
-    }
-  }, [scannedAddress]);
+  console.log("transfer token: ", transferTokens('0xCcA389082E6C986f737EDF855aE139aEaB80f2a2', 10));
+  
+
+  // useEffect(() => {
+  //   if (scannedAddress) {
+  //     setToAddress(scannedAddress);
+  //     setScannedAddress('');
+  //     setScanning(false);
+  //   }
+  // }, [scannedAddress]);
 
   const { config } = usePrepareSendTransaction({
     to: debouncedTo,
