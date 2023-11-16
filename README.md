@@ -1,4 +1,4 @@
-# constellation-stablecoin (Gold-Backed Stablecoin Project)
+# Gold-Backed Stablecoin Project
 
 ## Overview
 
