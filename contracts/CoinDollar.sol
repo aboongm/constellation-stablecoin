@@ -5,9 +5,9 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {CoinGold} from "./CoinGold.sol"; // Import the CoinGold token contract
 import "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
-// import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract CoinDollar is ERC20, AutomationCompatibleInterface {
+contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
     CoinGold public coinGold; // Reference to the CoinGold token contract
     AggregatorV3Interface internal goldPriceFeed; // Chainlink Aggregator for XAU/USD
     address public owner;
@@ -18,14 +18,14 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
 
     // int256 public lastGoldPrice;
 
-    // bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    // bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
 
 
     // event ExchangeGoldToDollar(address indexed from, uint256 amount);
 
-    modifier onlyCoinGold() {
+    /* modifier onlyCoinGold() {
         require(msg.sender == address(coinGold), "Caller is not CoinGold");
         _;
     }
@@ -33,7 +33,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can call this function");
         _;
-    } 
+    }  */
 
     constructor(
         string memory name,
@@ -43,6 +43,9 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
     ) ERC20(name, symbol) {
         owner = msg.sender;
         coinGold = CoinGold(_coinGoldAddress);
+
+        // coinGold.grantMinterRole(address(this));
+
         goldPriceFeed = AggregatorV3Interface(_goldPriceFeed);
         lastAdjustmentTimestamp = block.timestamp;
         reserveRatio = 20; // 20% reserve
@@ -51,9 +54,11 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
 
         // lastGoldPrice = uint256(getGoldPrice());
 
-        // _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        // _grantRole(ADMIN_ROLE, msg.sender);
-        // _grantRole(MINTER_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
+        _grantRole(MINTER_ROLE, msg.sender); 
+
+        // coinGold.grantMinterRole(address(this));
 
     }
 
@@ -77,20 +82,18 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         coinGold.transferFromUser(user, recipient, amount);
     }
 
-    /* function mintCoinGold(uint256 gramsOfGold) public onlyRole(MINTER_ROLE) {
-        // Only call this if CoinDollar contract is authorized to mint CoinGold
+    function mintCoinGold(uint256 gramsOfGold) public {
         coinGold.mintCoinGold(gramsOfGold);
     }
 
-    function burnCoinGold(uint256 amount) public onlyRole(MINTER_ROLE) {
-        // Only call this if CoinDollar contract is authorized to burn CoinGold
+    function burnCoinGold(uint256 amount) public {
         coinGold.burnCoinGold(amount);
     }
 
-    function transferCoinGold(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
-        // Only call this if CoinDollar contract is authorized to transfer CoinGold
+    function transferCoinGold(address to, uint256 amount) public {
         coinGold.transferCoinGold(to, amount);
-    }  */
+    }
+
 
    function adjustSupplyInternal() internal {
         // Calculate the change in the value of gold and adjust supply accordingly
@@ -170,17 +173,17 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         return coinDollarAmount;
     } */
 
-    function mint(uint256 amount) external onlyOwner {
+    function mint(uint256 amount) external onlyRole(MINTER_ROLE) {
         // Mint function for CoinDollar
         _mint(msg.sender, amount);
     }
 
-    function burn(uint256 amount) external onlyOwner {
+    function burn(uint256 amount) external onlyRole(MINTER_ROLE) {
         // Burn function for CoinDollar
         _burn(msg.sender, amount);
     }
 
-     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
+    function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
         uint256 totalCapitalizationCoinGold = (getGoldPrice() / 1e8) * coinGold.totalSupply();
         bool isSupplyTooHigh = totalSupply() > 2 * totalCapitalizationCoinGold;
         bool isSupplyTooLow = totalSupply() < totalCapitalizationCoinGold;
@@ -194,7 +197,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
     }
 
     // Change visibility of adjustSupply to internal and rename to avoid conflict with performUpkeep
-    function adjustSupply() external onlyOwner {
+    function adjustSupply() external onlyRole(ADMIN_ROLE) {
         adjustSupplyInternal();
     }
 
@@ -203,7 +206,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         return true;
     }
 
-   /*  function grantMinterRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function grantMinterRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(MINTER_ROLE, account);
     }
 
@@ -211,11 +214,14 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface {
         revokeRole(MINTER_ROLE, account);
     }
 
-    function grantMinterRoleInCoinGold(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        coinGold.grantMinterRole(account);
+    function grantMinterRoleInCoinGold() public onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(!coinGold.hasRole(coinGold.MINTER_ROLE(), address(this)), "CoinDollar already has MINTER_ROLE in CoinGold");
+
+        // Grant MINTER_ROLE to this contract (CoinDollar) in CoinGold
+        coinGold.grantMinterRole(address(this));
     }
 
-    function revokeMinterRoleInCoinGold(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        coinGold.revokeMinterRole(account);
-    } */
+    function revokeMinterRoleInCoinGold() public onlyRole(DEFAULT_ADMIN_ROLE) {
+        coinGold.revokeMinterRole(address(this));
+    } 
 }
