@@ -10,8 +10,8 @@ import abiCoinGold from "../../abi/abi-CoinGold.json"
 import abiCoinDollar from "../../abi/abi-CoinDollar.json"
 
 const tokenContracts = {
-  CoinGold: '0x628a290dF6B99a17593168460a269643A0D7BD5F',
-  CoinDollar: '0x1aC143a58e143EF29D119a4e0c1cA147aea4E15f',
+  CoinGold: '0xa143fcE4b63BB3e56F4f621349df09B53Bf8e3B8',
+  CoinDollar: '0x14496062DD4a45F00D644791b5C02bdcf9A7187D',
   // Add more tokens as needed
 };
 
@@ -66,11 +66,12 @@ export const Balances = () => {
 
 
         if (balanceCoinGold) {
-          const humanReadableCoinGoldBalance = (parseFloat(balanceCoinGold) / 1e18).toFixed(4)
+          const humanReadableCoinGoldBalance = (parseFloat(balanceCoinGold) / 1e18).toFixed(18)
           setCoinGoldBalance(humanReadableCoinGoldBalance.toString());
         }
         if (balanceCoinDollar) {
-          const humanReadableCoinDollarBalance = (parseFloat(balanceCoinDollar) / 1e18).toFixed(4)
+          // const humanReadableCoinDollarBalance = (parseFloat(balanceCoinDollar) / 1e18).toFixed(4)
+          const humanReadableCoinDollarBalance = (parseFloat(balanceCoinDollar) / 1e18).toFixed(18)
           setCoinDollarBalance(humanReadableCoinDollarBalance.toString())
         }
 

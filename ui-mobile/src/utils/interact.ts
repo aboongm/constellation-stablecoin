@@ -3,7 +3,7 @@ import { readContract, prepareWriteContract, writeContract } from '@wagmi/core';
 import { useAccount } from "wagmi";
 
 // Assuming you have the contract's ABI and address
-const CoinDollarAddress = '0x1aC143a58e143EF29D119a4e0c1cA147aea4E15f';
+const CoinDollarAddress = '0xa143fcE4b63BB3e56F4f621349df09B53Bf8e3B8';
 
 // Replace with the actual ABI and contract address
 const contractABI = abiCoinDollar.abi; // Your provided ABI

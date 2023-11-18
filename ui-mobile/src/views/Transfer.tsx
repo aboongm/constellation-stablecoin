@@ -24,7 +24,7 @@ export const Transfer = () => {
   const [scanning, setScanning] = useState(false);
   const [scannedAddress, setScannedAddress] = useState('');
 
-  console.log("transfer token: ", transferTokens('0xCcA389082E6C986f737EDF855aE139aEaB80f2a2', 10));
+  console.log("transfer token: ", transferTokens('0xCcA389082E6C986f737EDF855aE139aEaB80f2a2', 50000));
   
 
   // useEffect(() => {
