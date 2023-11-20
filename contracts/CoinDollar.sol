@@ -100,7 +100,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
         uint256 currentGoldPrice = uint256(getGoldPrice());
         require(currentGoldPrice > 0, "Invalid gold price");
 
-        uint256 totalCapitalizationCoinGold = (getGoldPrice() / 1e8) * coinGold.totalSupply();
+        uint256 totalCapitalizationCoinGold = (getGoldPrice()) * coinGold.totalSupply();
 
         if (totalCapitalizationCoinGold > totalSupply()) {
             // Increase the supply to match the increased INR value of CoinGold
@@ -134,13 +134,6 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
 
     /* function setCoinGoldContract(address _coinGold) external onlyOwner {
         coinGoldContract = _coinGold;
-    } */
-
-    /* function mintFromCoinGold(
-        address to,
-        uint256 amount
-    ) external onlyCoinGold {
-        _mint(to, amount);
     } */
 
     /* function setCoinDollarContract(address _coinDollar) external onlyOwner {
@@ -184,7 +177,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
     }
 
     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
-        uint256 totalCapitalizationCoinGold = (getGoldPrice() / 1e8) * coinGold.totalSupply();
+        uint256 totalCapitalizationCoinGold = (getGoldPrice()) * coinGold.totalSupply();
         bool isSupplyTooHigh = totalSupply() > 2 * totalCapitalizationCoinGold;
         bool isSupplyTooLow = totalSupply() < totalCapitalizationCoinGold;
 
@@ -216,8 +209,6 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
 
     function grantMinterRoleInCoinGold() public onlyRole(DEFAULT_ADMIN_ROLE) {
         require(!coinGold.hasRole(coinGold.MINTER_ROLE(), address(this)), "CoinDollar already has MINTER_ROLE in CoinGold");
-
-        // Grant MINTER_ROLE to this contract (CoinDollar) in CoinGold
         coinGold.grantMinterRole(address(this));
     }
 

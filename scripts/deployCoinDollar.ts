@@ -7,7 +7,7 @@ async function main() {
   // Example parameters for the CoinGold constructor
   const name = "CoinDollar";
   const symbol = "CNDO";
-  const _coinGoldAddress = "0x4A550af3EC188a282C8Bb7Ac2f3c19374013dF1B";
+  const _coinGoldAddress = "0x82E56b077B90C533285cD506DC373436e72fd925";
   const _dataFeedAddress = "0xC5981F461d74c46eB4b0CF3f4Ec79f025573B0Ea";
   // Deploy the CoinGold contract with the specified parameters
   const CoinDollar = await ethers.getContractFactory("CoinDollar");
@@ -16,7 +16,7 @@ async function main() {
   // Get the contract address from the deployed contract instance
   const contractAddress = await token.getAddress();
   console.log("Token address:", contractAddress);
-  // deployed CoinDollar Address: 0x1c284DfC079C8A0b495e52C690fD48d0624060AC
+  // deployed CoinDollar Address: 0xA23399b8f1AaeE93ac65597eA762bA41Aa9A0719
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -59,12 +59,12 @@ contract CoinGold is ERC20, AccessControl {
         return answer;
     }
 
-    // Mint new SANCoinGoldA tokens backed by physical gold
+    // Mint new CoinGold tokens backed by physical gold
     function mintCoinGold(uint256 gramsOfGold) external onlyRole(MINTER_ROLE) {
         // Mint the corresponding CoinGold tokens directly based on gramsOfGold
         require(gramsOfGold > 0, "Mint amount must be greater than zero");
-        _mint(msg.sender, gramsOfGold * 1e18);
-        emit Mint(msg.sender, gramsOfGold * 1e18); // Emit the Mint event here
+        _mint(msg.sender, gramsOfGold);
+        emit Mint(msg.sender, gramsOfGold); // Emit the Mint event here
     }
 
     // Burn CoinGold tokens when required, only callable by the ow0x80aC9A24c136cc2E722521f899951F6065aAB77aner
@@ -75,8 +75,8 @@ contract CoinGold is ERC20, AccessControl {
         require(balanceOf(msg.sender) >= amount, "Insufficient CoinGold balance");
 
         // Implement the burning mechanism
-        _burn(msg.sender, amount * 1e18);
-         emit Burn(msg.sender, amount * 1e18); // Emit the Burn event here
+        _burn(msg.sender, amount);
+         emit Burn(msg.sender, amount); // Emit the Burn event here
     }
 
     // Calculate the total capitalization of the tokens
@@ -87,7 +87,7 @@ contract CoinGold is ERC20, AccessControl {
 
         // Calculate the total capitalization of all CoinGold tokens
         uint256 totalSupplyCoinGold = totalSupply();
-        return uint256(latestGoldPrice) * totalSupplyCoinGold / 1e8;
+        return uint256(latestGoldPrice) * totalSupplyCoinGold;
     }
     
     // Add other functions and modifiers as needed to meet requirements
