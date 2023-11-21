@@ -1,10 +1,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Signer } from "ethers";
+import { Signer, toBigInt } from "ethers";
 import {
   CoinGold,
   MockChainlinkPriceFeed,
 } from "../typechain-types";
+const MINTER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("MINTER_ROLE"));
+const ADMIN_ROLE = ethers.keccak256(ethers.toUtf8Bytes("ADMIN_ROLE"));
 
 describe("CoinGold", function () {
   let name: string;
@@ -32,6 +34,8 @@ describe("CoinGold", function () {
     );
 
     await coingold.waitForDeployment();
+    await coingold.connect(owner).grantMinterRole(owner.getAddress());
+    // await coingold.connect(owner).grantAdminRole(owner.address);
   });
 
   // Deployment Test:
@@ -73,6 +77,8 @@ describe("CoinGold", function () {
     );
     expect(newBalance).to.equal(updatedBalance - burnAmount);
   });
+
+  
 
   it("Total Capitalization Calculation", async () => {
     // Call the totalCapitalization function and verify the calculation
@@ -153,24 +159,174 @@ describe("CoinGold", function () {
     expect(burnGasUsed).to.be.lte(100000); // Set an appropriate limit based on your contract complexity
   });
 
-  describe("Ownership test", async () => {
-    it("should not allow non-owners to mint tokens", async () => {
-      const nonOwner = await ethers.provider.getSigner(1);
-      const mintAmount = ethers.parseEther("0.001");
-      await expect(
-        coingold.connect(nonOwner).mintCoinGold(mintAmount)
-      ).to.be.revertedWith("Only the owner can call this function");
-    });
-
-    it("should not allow non-owners to burn tokens", async () => {
-      const nonOwner = await ethers.provider.getSigner(1);
-      const burnAmount = ethers.parseEther("0.001");
-      await expect(
-        coingold.connect(nonOwner).burnCoinGold(burnAmount)
-      ).to.be.revertedWith("Only the owner can call this function");
-    });
+  // These are new tests
+  it("should transfer tokens and emit Transfer event on transferCoinGold", async () => {
+    const [owner, recipient] = await ethers.getSigners();
+    const transferAmount = ethers.parseUnits("5", 18);
+  
+    // Mint tokens first
+    await coingold.connect(owner).mintCoinGold(transferAmount);
+  
+    // Transfer tokens and expect a Transfer event
+    await expect(coingold.connect(owner).transferCoinGold(recipient.address, transferAmount))
+      .to.emit(coingold, "Transfer")
+      .withArgs(owner.address, recipient.address, transferAmount);
+  
+    const recipientBalance = await coingold.balanceOf(recipient.address);
+    expect(recipientBalance).to.equal(transferAmount);
   });
 
+  it("should revert when transferring tokens to a zero address", async () => {
+    const [owner] = await ethers.getSigners();
+    const transferAmount = ethers.parseUnits("1", 18);
+
+    // Mint tokens first
+    await coingold.connect(owner).mintCoinGold(transferAmount);
+
+    // Attempt to transfer to a zero address
+    await expect(coingold.connect(owner).transferCoinGold("0x0000000000000000000000000000000000000000", transferAmount))
+      .to.be.revertedWithCustomError(coingold, "ERC20InvalidReceiver");
+  });
+
+  it("should revert when transferring more tokens than the balance", async () => {
+    const [owner, recipient] = await ethers.getSigners();
+    const transferAmount = ethers.parseUnits("1", 18);
+
+    // Attempt to transfer more tokens than balance (without minting first)
+    await expect(coingold.connect(owner).transferCoinGold(recipient.address, transferAmount))
+      .to.be.revertedWithCustomError(coingold, "ERC20InsufficientBalance");
+  });
+
+  describe("Role-based Access Control Tests", function () {
+    it("should only allow MINTER_ROLE to mint tokens", async () => {
+      const nonMinter = await ethers.provider.getSigner(1);
+      const mintAmount = ethers.parseEther("1");
+      await coingold.connect(owner).revokeRole(MINTER_ROLE, nonMinter.address);
+      await expect(
+        coingold.connect(nonMinter).mintCoinGold(mintAmount)
+      ).to.be.revertedWithCustomError(coingold, "AccessControlUnauthorizedAccount");
+    });
+    
+    it("should only allow MINTER_ROLE to burn tokens", async () => {
+      const nonMinter = await ethers.provider.getSigner(1);
+      const burnAmount = ethers.parseEther("10");
+      await coingold.connect(owner).revokeRole(MINTER_ROLE, nonMinter.address);
+      await expect(
+        coingold.connect(nonMinter).burnCoinGold(burnAmount)
+      ).to.be.revertedWithCustomError(coingold, "AccessControlUnauthorizedAccount");
+    });
+    
+    it("should allow only ADMIN_ROLE to set coinDollar address", async () => {
+      const nonAdmin = (await ethers.getSigners())[1];
+      const newAddress = ethers.Wallet.createRandom().address;
+      await coingold.connect(owner).revokeRole(ADMIN_ROLE, nonAdmin.address);
+    
+      await expect(
+        coingold.connect(nonAdmin).setCoinDollarAddress(newAddress)
+      ).to.be.revertedWithCustomError(coingold, "AccessControlUnauthorizedAccount");
+    });
+    
+    it("should have correct owner and roles assigned", async () => {
+      const contractOwner = await coingold.owner();
+      expect(contractOwner).to.equal(await owner.getAddress());
+    
+      const isOwnerAdmin = await coingold.hasRole(ADMIN_ROLE, contractOwner);
+      expect(isOwnerAdmin).to.be.true;
+    
+      const isOwnerMinter = await coingold.hasRole(MINTER_ROLE, contractOwner);
+      expect(isOwnerMinter).to.be.true;
+    });
+    
+    it("should correctly assign and revoke a role", async () => {
+      const nonOwner = (await ethers.getSigners())[1];
+      const nonOwnerAddress = await nonOwner.getAddress();
+    
+      // Grant a role to a non-owner account and check if the role is correctly assigned
+      await coingold.connect(owner).grantRole(MINTER_ROLE, nonOwnerAddress);
+      expect(await coingold.hasRole(MINTER_ROLE, nonOwnerAddress)).to.be.true;
+    
+      // Revoke the role and check if it is correctly removed
+      await coingold.connect(owner).revokeRole(MINTER_ROLE, nonOwnerAddress);
+      expect(await coingold.hasRole(MINTER_ROLE, nonOwnerAddress)).to.be.false;
+    });
+    
+    it("should handle multiple roles per account correctly", async () => {
+      const multiRoleUser = (await ethers.getSigners())[1];
+      const multiRoleUserAddress = await multiRoleUser.getAddress();
+    
+      // Grant both MINTER_ROLE and ADMIN_ROLE to the same account
+      await coingold.connect(owner).grantRole(MINTER_ROLE, multiRoleUserAddress);
+      await coingold.connect(owner).grantRole(ADMIN_ROLE, multiRoleUserAddress);
+    
+      // Check if the account has both roles
+      const hasMinterRole = await coingold.hasRole(MINTER_ROLE, multiRoleUserAddress);
+      const hasAdminRole = await coingold.hasRole(ADMIN_ROLE, multiRoleUserAddress);
+      expect(hasMinterRole && hasAdminRole).to.be.true;
+    
+      // Revoke one role and check if the other is still intact
+      await coingold.connect(owner).revokeRole(MINTER_ROLE, multiRoleUserAddress);
+      expect(await coingold.hasRole(ADMIN_ROLE, multiRoleUserAddress)).to.be.true;
+    });
+    
+    it("should not revert when granting or revoking a non-existent role", async () => {
+      const nonExistentRole = ethers.id("NON_EXISTENT_ROLE");
+      const randomAccount = (await ethers.getSigners())[1];
+    
+      // Grant a non-existent role
+      await expect(
+        coingold.connect(owner).grantRole(nonExistentRole, randomAccount.getAddress())
+      ).not.to.be.reverted;
+    
+      // Revoke a non-existent role
+      await expect(
+        coingold.connect(owner).revokeRole(nonExistentRole, randomAccount.getAddress())
+      ).not.to.be.reverted;
+    });
+
+    it("should emit events on role changes", async () => {
+      const newMinter = (await ethers.getSigners())[1];
+      const newMinterAddress = await newMinter.getAddress();
+    
+      // Expect RoleGranted event on granting a role
+      await expect(coingold.connect(owner).grantRole(MINTER_ROLE, newMinterAddress))
+        .to.emit(coingold, "RoleGranted")
+        .withArgs(MINTER_ROLE, newMinterAddress, await owner.getAddress());
+    
+      // Expect RoleRevoked event on revoking a role
+      await expect(coingold.connect(owner).revokeRole(MINTER_ROLE, newMinterAddress))
+        .to.emit(coingold, "RoleRevoked")
+        .withArgs(MINTER_ROLE, newMinterAddress, await owner.getAddress());
+    });
+
+    it("should allow MINTER_ROLE to transfer tokens using transferFromUser", async () => {
+      const [owner, user, recipient] = await ethers.getSigners();
+      const transferAmount = ethers.parseUnits("10", 18);
+    
+      // Mint tokens to the user first
+      await coingold.connect(owner).mintCoinGold(transferAmount);
+      await coingold.connect(owner).transferCoinGold(user.address, transferAmount);
+    
+      // Transfer tokens from user to recipient by the owner (who has MINTER_ROLE)
+      await expect(coingold.connect(owner).transferFromUser(user.address, recipient.address, transferAmount))
+        .to.emit(coingold, "Transfer")
+        .withArgs(user.address, recipient.address, transferAmount);
+    
+      const recipientBalance = await coingold.balanceOf(recipient.address);
+      expect(recipientBalance).to.equal(transferAmount);
+    });
+
+    it("should not allow non-MINTER_ROLE to use transferFromUser", async () => {
+      const [, user, nonMinter, recipient] = await ethers.getSigners();
+      const transferAmount = ethers.parseUnits("5", 18);
+  
+      // Attempt to transfer tokens by a non-minter
+      await expect(coingold.connect(nonMinter).transferFromUser(user.address, recipient.address, transferAmount))
+        .to.be.revertedWithCustomError(coingold, "AccessControlUnauthorizedAccount")
+        .withArgs(nonMinter.address, MINTER_ROLE);
+    });
+
+  });
+  
   describe("Edge cases test", async () => {
     // Test for minting zero tokens
     it("should revert when minting zero tokens", async () => {
