@@ -16,15 +16,15 @@ export function SendTransaction() {
   const [recipientAddress, setRecipientAddress] = useState('');
   const [amount, setAmount] = useState('');
 
-  const onCoinTypeChange = (event) => {
+  const onCoinTypeChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
     setCoinType(event.target.value);
   };
 
-  const onRecipientAddressChange = (event) => {
+  const onRecipientAddressChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
     setRecipientAddress(event.target.value);
   };
 
-  const onAmountChange = (event) => {
+  const onAmountChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
     setAmount(event.target.value);
   };
 
