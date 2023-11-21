@@ -139,7 +139,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
 
 
 
-    function exchangeGoldToDollar(uint256 coinGoldAmount) public {
+    /* function exchangeGoldToDollar(uint256 coinGoldAmount) public {
         // require(coinGold.balanceOf(msg.sender) >= coinGoldAmount, "Insufficient CoinGold balance");
 
         coinGold.transferFromUser(address(this), msg.sender, coinGoldAmount);
@@ -168,7 +168,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
 
 
 
-
+ */
 
 
 
