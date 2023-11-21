@@ -41,7 +41,7 @@ export function SendTransaction() {
   };
 
   return (
-    <form style={{ display: 'flex', minWidth: '300px', margin: '0 auto', flexDirection: 'column', alignItems: 'center' }}>
+    <form style={{ display: 'flex', minWidth: '320px', margin: '0 auto', flexDirection: 'column', alignItems: 'center' }}>
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '10px', width: '100%' }}>
       <select
         value={coinType}
@@ -105,7 +105,7 @@ export function SendTransaction() {
       style={{
         padding: '10px 20px',
         borderRadius: '5px',
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#0e76fd',
         color: 'white',
         border: 'none',
         cursor: 'pointer',

@@ -38,7 +38,7 @@ function App() {
     </div>
   ) : (
     <div className={styles.container}>
-      <main className={styles.main}>
+      <main style={{display: 'flex', minHeight: "100vh", alignItems: 'center', justifyContent: 'center'}}>
         <ConnectButton />
       </main>
     </div>

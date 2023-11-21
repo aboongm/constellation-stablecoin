@@ -102,7 +102,7 @@ export default function Balances() {
                         <p>CNGD</p>
                     </div>
                     <div style={{display: 'flex', gap: 10}}>
-                        <p>MyBalance:</p>
+                        <p>MyBalance  :</p>
                         <p>{coinGoldBalance}</p>
                         <p>CNGD</p>
                     </div>
@@ -124,7 +124,7 @@ export default function Balances() {
                         <p>CNDO</p>
                     </div>
                     <div style={{display: 'flex', gap: 10}}>
-                        <p>MyBalance:</p>
+                        <p>MyBalance :</p>
                         <p>{coinDollarBalance}</p>
                         <p>CNDO</p>
                     </div>

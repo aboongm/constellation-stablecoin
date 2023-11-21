@@ -38,6 +38,7 @@ export async function TransferCoinGold(recipientAddress: string, amount: string,
     const userConfirmation = window.confirm(`Transaction Details:\nRecipient: ${recipientAddress}\nAmount: ${amount.toString()} COINGOLD\nGas Estimate: ${estimatedGas}\nGas Fee: ${gasValue} ETH\n\nConfirm Transaction?`);
 
     if (userConfirmation) {
+        // console.log(tokenContract.getChainlinkDataFeedLatestAnswer())
       // Send the transaction
       const transaction = await tokenContract.transfer(recipientAddress, amountToSend);
       console.log("Transaction hash:", transaction.hash);
