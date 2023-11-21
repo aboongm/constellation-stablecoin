@@ -88,13 +88,30 @@ describe("CoinDollar", function () {
     expect(goldPrice).to.be.above(0);
   });
 
+  it("should emit a Mint event when tokens are minted", async () => {
+    const mintAmount = ethers.parseEther("0.001");
+    await expect(coinDollar.connect(await ethers.provider.getSigner(0)).mint(mintAmount))
+      .to.emit(coinDollar, "Mint")
+      .withArgs(ownerAddress, mintAmount);
+  });
+
+  it("should emit a Burn event when tokens are burned", async () => {
+    const initialBalance = 1000;
+    await coinDollar.connect(await ethers.provider.getSigner(0)).mint(initialBalance);
+  
+    const burnAmount = 200;
+    await expect(coinDollar.connect(await ethers.provider.getSigner(0)).burn(burnAmount))
+      .to.emit(coinDollar, "Burn")
+      .withArgs(ownerAddress, burnAmount);
+  });
+  
   describe("adjustSupply", async () => {
     it("should increase supply when total capitalization of CoinGold is greater than CoinDollar supply", async () => {
       // Mint some CoinDollar tokens to set an initial supply
       const initialMintAmount = ethers.parseEther("0.0001");
       await coinDollar.connect(await ethers.provider.getSigner(0)).mint(initialMintAmount);
 
-      const mintAmountCoinGold = 1000000; 
+      const mintAmountCoinGold = 1000000000000; 
       await coinGold.connect(await ethers.provider.getSigner(0)).mintCoinGold(mintAmountCoinGold);
   
       // Adjust CoinGold total supply or mock price feed to ensure capitalization is greater
@@ -126,7 +143,7 @@ describe("CoinDollar", function () {
       const initialMintAmount = ethers.parseEther("0.0001");
       await coinDollar.connect(await ethers.provider.getSigner(0)).mint(initialMintAmount);
 
-      const mintAmountCoinGold = 300; 
+      const mintAmountCoinGold = 500 * 1e8; 
       await coinGold.connect(await ethers.provider.getSigner(0)).mintCoinGold(mintAmountCoinGold);
       
       const initialSupply = await coinDollar.totalSupply();
@@ -139,7 +156,7 @@ describe("CoinDollar", function () {
       const initialMintAmount = ethers.parseEther("0.0001");
       await coinDollar.connect(await ethers.provider.getSigner(0)).mint(initialMintAmount);
 
-      const mintAmountCoinGold = 500; 
+      const mintAmountCoinGold = 500 * 1e8; 
       await coinGold.connect(await ethers.provider.getSigner(0)).mintCoinGold(mintAmountCoinGold);
 
       const initialSupply = await coinDollar.totalSupply();
@@ -152,15 +169,15 @@ describe("CoinDollar", function () {
     });
 
     it("should increase supply at just above the exact threshold for increase", async () => {
-      await coinGold.connect(await ethers.provider.getSigner(0)).mintCoinGold(1000);
-      await coinDollar.connect(await ethers.provider.getSigner(0)).mint(ethers.parseEther("1"));
+      await coinGold.connect(await ethers.provider.getSigner(0)).mintCoinGold(500 * 1e8);
+      await coinDollar.connect(await ethers.provider.getSigner(0)).mint(ethers.parseEther("0.0001"));
     
       const initialSupply = await coinDollar.totalSupply();
       const thresholdPrice = await calculateRequiredGoldPriceForSupplyIncrease(coinGold, coinDollar);
     
       // Increase the gold price slightly above the threshold
       const adjustedPrice = thresholdPrice + BigInt(1);
-      await mockPriceFeed.setLatestPrice(adjustedPrice);
+      await mockPriceFeed.setLatestPrice(adjustedPrice * BigInt(1e8));
       await coinDollar.adjustSupply();
     
       const newSupply = await coinDollar.totalSupply();
@@ -168,21 +185,46 @@ describe("CoinDollar", function () {
     });    
     
     it("should decrease supply at just below the exact threshold for decrease", async () => {
-      await coinGold.connect(await ethers.provider.getSigner(0)).mintCoinGold(1000);
-      await coinDollar.connect(await ethers.provider.getSigner(0)).mint(ethers.parseEther("10"));
+      await coinGold.connect(await ethers.provider.getSigner(0)).mintCoinGold(500 * 1e8);
+      await coinDollar.connect(await ethers.provider.getSigner(0)).mint(ethers.parseEther("1"));
     
       const initialSupply = await coinDollar.totalSupply();
       const thresholdPrice = await calculateRequiredGoldPriceForSupplyDecrease(coinGold, coinDollar);
     
       // Decrease the gold price slightly below the threshold
       const adjustedPrice = thresholdPrice - BigInt(1);
-      await mockPriceFeed.setLatestPrice(adjustedPrice);
+      await mockPriceFeed.setLatestPrice(adjustedPrice * BigInt(1e8));
       await coinDollar.adjustSupply();
     
       const newSupply = await coinDollar.totalSupply();
       expect(newSupply).to.be.lessThan(initialSupply);
     });
+
+    it("should emit an AdjustSupply event when conditions are met", async () => {
+      const [owner] = await ethers.getSigners();
     
+      // Mint CoinGold to increase its capitalization
+      const mintAmountCoinGold = ethers.parseUnits("1000000", 18);
+      await coinGold.connect(owner).mintCoinGold(mintAmountCoinGold);
+    
+      // Fetch the current gold price to calculate total capitalization
+      const currentGoldPrice = await coinDollar.getGoldPrice();
+      const totalCapitalizationCoinGold = currentGoldPrice / BigInt(1e8) * mintAmountCoinGold;
+    
+      // Ensure CoinDollar supply is less than CoinGold's capitalization
+      const initialSupply = await coinDollar.totalSupply();
+      expect(initialSupply).to.be.lessThan(totalCapitalizationCoinGold);
+    
+      // Calculate the expected new supply
+      const expectedNewSupply = totalCapitalizationCoinGold;
+    
+      // Call adjustSupply and check for event emission
+      await expect(coinDollar.connect(owner).adjustSupply())
+        .to.emit(coinDollar, "AdjustSupply")
+        .withArgs(expectedNewSupply);
+    });
+    
+  
   })
 
   describe("Role-based Access Control Tests", function () {
@@ -319,8 +361,38 @@ describe("CoinDollar", function () {
         .to.emit(coinDollar, "RoleRevoked")
         .withArgs(MINTER_ROLE, member.address, admin.address);
     });
+
+    it("should handle transferring roles between accounts", async () => {
+      const [admin, oldAccount, newAccount] = await ethers.getSigners();
+    
+      // Initially grant MINTER_ROLE to oldAccount
+      await coinDollar.grantMinterRole(oldAccount.address);
+      expect(await coinDollar.hasRole(MINTER_ROLE, oldAccount.address)).to.be.true;
+    
+      // Transfer MINTER_ROLE from oldAccount to newAccount
+      await coinDollar.revokeMinterRole(oldAccount.address);
+      await coinDollar.grantMinterRole(newAccount.address);
+    
+      // Verify oldAccount no longer has the role
+      expect(await coinDollar.hasRole(MINTER_ROLE, oldAccount.address)).to.be.false;
+    
+      // Verify newAccount has the role
+      expect(await coinDollar.hasRole(MINTER_ROLE, newAccount.address)).to.be.true;
+    
+      // oldAccount should not be able to mint tokens now
+      const mintAmount = ethers.parseEther("1");
+      await expect(coinDollar.connect(oldAccount).mint(mintAmount))
+        .to.be.revertedWithCustomError(coinDollar, "AccessControlUnauthorizedAccount");
+    
+      // newAccount should be able to mint tokens
+      await expect(coinDollar.connect(newAccount).mint(mintAmount))
+        .not.to.be.reverted;
+    });
+    
     
   });
+
+  
 
   /* describe("Ownership test", async () => {
     it("should not allow non-owners to mint tokens", async () => {

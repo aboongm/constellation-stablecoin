@@ -59,6 +59,7 @@ describe("CoinGold", function () {
     );
     // Convert the JavaScript number to a BigNumber representing Ether (assuming ethAmount is in Ether)
     const mintAmount = ethers.parseEther("0.001");
+    
     await coingold.mintCoinGold(mintAmount);
     const updatedBalance = await coingold.balanceOf(
       (
@@ -216,7 +217,7 @@ describe("CoinGold", function () {
       ).to.be.revertedWithCustomError(coingold, "AccessControlUnauthorizedAccount");
     });
     
-    it("should allow only ADMIN_ROLE to set coinDollar address", async () => {
+   /*  it("should allow only ADMIN_ROLE to set coinDollar address", async () => {
       const nonAdmin = (await ethers.getSigners())[1];
       const newAddress = ethers.Wallet.createRandom().address;
       await coingold.connect(owner).revokeRole(ADMIN_ROLE, nonAdmin.address);
@@ -224,7 +225,7 @@ describe("CoinGold", function () {
       await expect(
         coingold.connect(nonAdmin).setCoinDollarAddress(newAddress)
       ).to.be.revertedWithCustomError(coingold, "AccessControlUnauthorizedAccount");
-    });
+    }); */
     
     it("should have correct owner and roles assigned", async () => {
       const contractOwner = await coingold.owner();

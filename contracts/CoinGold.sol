@@ -21,11 +21,6 @@ contract CoinGold is ERC20, AccessControl {
     event Mint(address indexed to, uint256 amount);
     event Burn(address indexed from, uint256 amount);
 
-    /* modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can call this function");
-        _;
-    }  */
-
      /**
      * Network: Sepolia
      * Aggregator: XAU/USD
@@ -60,14 +55,13 @@ contract CoinGold is ERC20, AccessControl {
     }
 
     // Mint new CoinGold tokens backed by physical gold
-    function mintCoinGold(uint256 gramsOfGold) external onlyRole(MINTER_ROLE) {
-        // Mint the corresponding CoinGold tokens directly based on gramsOfGold
-        require(gramsOfGold > 0, "Mint amount must be greater than zero");
-        _mint(msg.sender, gramsOfGold);
-        emit Mint(msg.sender, gramsOfGold); // Emit the Mint event here
+    function mintCoinGold(uint256 ouncesOfGold) external onlyRole(MINTER_ROLE) {
+        // Mint the corresponding CoinGold tokens directly based on ouncesOfGold
+        require(ouncesOfGold > 0, "Mint amount must be greater than zero");
+        _mint(msg.sender, ouncesOfGold);
+        emit Mint(msg.sender, ouncesOfGold); 
     }
 
-    // Burn CoinGold tokens when required, only callable by the ow0x80aC9A24c136cc2E722521f899951F6065aAB77aner
     function burnCoinGold(uint256 amount) external onlyRole(MINTER_ROLE) {
         // Implement logic to burn CoinGold tokens when needed
         // Make sure to check if the contract has sufficient balance for burning
@@ -87,14 +81,14 @@ contract CoinGold is ERC20, AccessControl {
 
         // Calculate the total capitalization of all CoinGold tokens
         uint256 totalSupplyCoinGold = totalSupply();
-        return uint256(latestGoldPrice) * totalSupplyCoinGold;
+        return uint256(latestGoldPrice / 1e8) * totalSupplyCoinGold;
     }
     
-    // Add other functions and modifiers as needed to meet requirements
+   /*  // Add other functions and modifiers as needed to meet requirements
     function setCoinDollarAddress(address _coinDollar) external onlyRole(ADMIN_ROLE) {
         coinDollar = _coinDollar;
     }
-
+ */
 
     function transferFromUser(address user, address recipient, uint256 amount) external onlyRole(MINTER_ROLE) {
         _transfer(user, recipient, amount);
@@ -115,3 +109,5 @@ contract CoinGold is ERC20, AccessControl {
     } 
 
 }
+
+

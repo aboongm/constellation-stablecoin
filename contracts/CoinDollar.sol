@@ -16,24 +16,17 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
     uint256 public maximumBackingValue; // 100% USD value of CoinGold
     uint256 public minimumBackingValue; // 50% USD value of CoinGold
 
-    // int256 public lastGoldPrice;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
 
-
-    // event ExchangeGoldToDollar(address indexed from, uint256 amount);
-
-    /* modifier onlyCoinGold() {
-        require(msg.sender == address(coinGold), "Caller is not CoinGold");
-        _;
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can call this function");
-        _;
-    }  */
+    // Events
+    event Mint(address indexed to, uint256 amount);
+    event Burn(address indexed from, uint256 amount);
+    event AdjustSupply(uint256 newSupply);
+    event ExchangeGoldToDollar(address indexed user, uint256 coinGoldAmount, uint256 coinDollarAmount);
+    
 
     constructor(
         string memory name,
@@ -82,8 +75,8 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
         coinGold.transferFromUser(user, recipient, amount);
     }
 
-    function mintCoinGold(uint256 gramsOfGold) public {
-        coinGold.mintCoinGold(gramsOfGold);
+    function mintCoinGold(uint256 ouncesOfGold) public {
+        coinGold.mintCoinGold(ouncesOfGold);
     }
 
     function burnCoinGold(uint256 amount) public {
@@ -100,7 +93,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
         uint256 currentGoldPrice = uint256(getGoldPrice());
         require(currentGoldPrice > 0, "Invalid gold price");
 
-        uint256 totalCapitalizationCoinGold = (getGoldPrice()) * coinGold.totalSupply();
+        uint256 totalCapitalizationCoinGold = (getGoldPrice() / 1e8) * coinGold.totalSupply();
 
         if (totalCapitalizationCoinGold > totalSupply()) {
             // Increase the supply to match the increased INR value of CoinGold
@@ -128,53 +121,65 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
         }
 
         lastAdjustmentTimestamp = block.timestamp;
+        uint256 newSupply = totalSupply(); // Assuming newSupply is the total supply after adjustment
+        emit AdjustSupply(newSupply); // Emitting the AdjustSupply event
     }
-
-    // CoinDollar public coinDollar;
-
-    /* function setCoinGoldContract(address _coinGold) external onlyOwner {
-        coinGoldContract = _coinGold;
-    } */
-
-    /* function setCoinDollarContract(address _coinDollar) external onlyOwner {
-        coinDollar = CoinDollar(_coinDollar);
-    } */ 
-    
-
-    /* function exchangeGoldToDollar(uint256 coinGoldAmount) public {
-        require(coinGold.balanceOf(msg.sender) >= coinGoldAmount, "Insufficient CoinGold balance");
-
-        // Transfer CoinGold from the user to this contract
-        coinGold.transferFromUser(msg.sender, address(this), coinGoldAmount);
-
-        // Calculate the equivalent amount of CoinDollar
-        uint256 coinDollarAmount = calculateCoinDollarAmount(coinGoldAmount);
-
-        // Transfer CoinDollar to the user
-        transfer(msg.sender, coinDollarAmount);
-
-        emit ExchangeGoldToDollar(msg.sender, coinGoldAmount);
-    }
-
-    // Function to calculate the amount of CoinDollar based on the amount of CoinGold
-    function calculateCoinDollarAmount(uint256 coinGoldAmount) private view returns (uint256) {
-        (, int256 goldPrice, , , ) = goldPriceFeed.latestRoundData();
-        require(goldPrice > 0, "Invalid gold price"); 
-
-        // Example calculation: You might need to adjust the formula based on your tokenomics
-        uint256 coinDollarAmount = (coinGoldAmount * uint256(goldPrice)) / 1e8;
-        return coinDollarAmount;
-    } */
 
     function mint(uint256 amount) external onlyRole(MINTER_ROLE) {
         // Mint function for CoinDollar
         _mint(msg.sender, amount);
+        emit Mint(msg.sender, amount);
     }
 
     function burn(uint256 amount) external onlyRole(MINTER_ROLE) {
         // Burn function for CoinDollar
         _burn(msg.sender, amount);
+        emit Burn(msg.sender, amount);
     }
+
+
+
+    function exchangeGoldToDollar(uint256 coinGoldAmount) public {
+        // require(coinGold.balanceOf(msg.sender) >= coinGoldAmount, "Insufficient CoinGold balance");
+
+        coinGold.transferFromUser(address(this), msg.sender, coinGoldAmount);
+
+        // Calculate the equivalent amount of CoinDollar
+        uint256 coinDollarAmount = calculateCoinDollarAmount(coinGoldAmount);
+
+        // Mint the calculated amount of CoinDollar to the user
+        _mint(msg.sender, coinDollarAmount);
+
+        // Emit an event for the exchange
+        emit ExchangeGoldToDollar(msg.sender, coinGoldAmount, coinDollarAmount);
+    }
+
+    // Helper function to calculate the equivalent amount of CoinDollar
+    function calculateCoinDollarAmount(uint256 coinGoldAmount) private view returns (uint256) {
+        (, int256 goldPrice, , , ) = goldPriceFeed.latestRoundData();
+        require(goldPrice > 0, "Invalid gold price");
+
+        uint256 goldPriceUint = uint256(goldPrice);
+
+        uint256 coinDollarAmount = (coinGoldAmount * goldPriceUint) / 1e8; 
+
+        return coinDollarAmount;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
         uint256 totalCapitalizationCoinGold = (getGoldPrice()) * coinGold.totalSupply();
