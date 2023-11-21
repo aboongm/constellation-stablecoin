@@ -3,7 +3,7 @@ import abiCoinDollar from "../../abi/abi-CoinDollar.json";
 import { formatEther } from "viem";
 
 // Contract address and ABI of the token
-const tokenAddress = "0x1aC143a58e143EF29D119a4e0c1cA147aea4E15f"; // Replace with the actual token contract address
+const tokenAddress = "0x14496062DD4a45F00D644791b5C02bdcf9A7187D"; // Replace with the actual token contract address
 const tokenAbi = abiCoinDollar.abi; // Replace with the actual token ABI
 
 // Your wallet's private key and Infura provider
@@ -36,21 +36,28 @@ export async function TransferCoinDollar(recipientAddress: string, amount: strin
       
   
       // Display the gas estimate to the user
-      const gasPrice = (await provider.getFeeData()).gasPrice
-      const gasValue = ethers.formatEther(gasPrice * estimatedGas);
+      const gasPrice = (await provider.getFeeData())?.gasPrice 
+      let gasValue;
+      if (gasPrice !== null && gasPrice !== undefined) {
+        gasValue = ethers.formatEther(gasPrice * estimatedGas);
+        // Use gasValue here or perform further operations
+      } else {
+        // Handle the case where gasPrice is null or undefined
+        console.error('Gas price is null or undefined');
+      }
       
-      // // Ask for user confirmation with gas information
-    //   const userConfirmation = window.confirm(`Transaction Details:\nRecipient: ${recipientAddress}\nAmount: ${amount.toString()} COINDOLLAR\nGas Estimate: ${estimatedGas}\nGas Fee: ${gasValue} ETH\n\nConfirm Transaction?`);
+      // Ask for user confirmation with gas information
+      const userConfirmation = window.confirm(`Transaction Details:\nRecipient: ${recipientAddress}\nAmount: ${amount.toString()} COINDOLLAR\nGas Estimate: ${estimatedGas}\nGas Fee: ${gasValue} ETH\n\nConfirm Transaction?`);
   
-    //   if (userConfirmation) {
-    //     // Send the transaction
-    //     // const transaction = await tokenContract.transfer(recipientAddress, amountToSend);
-    //     // console.log("Transaction hash:", transaction.hash);
-    //     // await transaction.wait();
-    //     // alert("Transfer successful!");
-    //   } else {
-    //     console.log("Transaction canceled by the user.");
-    //   }
+      if (userConfirmation) {
+        // Send the transaction
+        const transaction = await tokenContract.transfer(recipientAddress, amountToSend);
+        console.log("Transaction hash:", transaction.hash);
+        await transaction.wait();
+        alert("Transfer successful!");
+      } else {
+        console.log("Transaction canceled by the user.");
+      }
     } catch (error) {
       console.error("Error transferring tokens:", error);
     }
