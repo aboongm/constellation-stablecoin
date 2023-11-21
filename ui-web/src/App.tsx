@@ -14,7 +14,7 @@ function App() {
 
         <div className={styles.title}>
           <h4 style={{
-            margin: 4,
+            margin: 4, color: '#5f5959'
           }}>Constellation Hackathon:</h4>
           <a href="https://github.com/aboongm/constellation-stablecoin" >Gold Backed Stablecoin</a>
         </div>
