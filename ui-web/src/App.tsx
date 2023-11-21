@@ -1,27 +1,32 @@
 import styles from './styles/Home.module.css';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
 import { SendTransaction } from "./components/SendTransaction";
+import Balances from './components/Balances';
 
 function App() {
-  return (
+  const { isConnected } = useAccount();
+
+  return isConnected ? (
     <div className={styles.container}>
       <main className={styles.main}>
         <ConnectButton />
 
-        <h1 className={styles.title}>
-          Constellation Hackathon: <a href="https://github.com/aboongm/constellation-stablecoin">Gold Backed Stablecoin</a>
-        </h1>
+        <div className={styles.title}>
+          <h4 style={{
+            margin: 4,
+          }}>Constellation Hackathon:</h4>
+          <a href="https://github.com/aboongm/constellation-stablecoin" >Gold Backed Stablecoin</a>
+        </div>
+
+        <div className={styles.grid}>
+          <Balances />
+        </div>
 
         <div className={styles.grid}>
           <div className={styles.card} >
             <SendTransaction />
           </div>
-
-          {/* <a className={styles.card} href="https://rainbowkit.com">
-            <h2>RainbowKit Documentation &rarr;</h2>
-            <p>Learn how to customize your wallet connection flow.</p>
-          </a> */}
-
         </div>
       </main>
 
@@ -30,6 +35,12 @@ function App() {
           Made with ❤️ by Ranjit & Yingjie
         </a>
       </footer>
+    </div>
+  ) : (
+    <div className={styles.container}>
+      <main className={styles.main}>
+        <ConnectButton />
+      </main>
     </div>
   );
 }
