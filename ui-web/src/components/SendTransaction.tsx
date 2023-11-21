@@ -46,7 +46,17 @@ export function SendTransaction() {
       <select
         value={coinType}
         onChange={onCoinTypeChange}
-        style={{ width: '100%', marginBottom: '10px', padding: '8px', borderRadius: '5px', boxSizing: 'border-box' }}
+        style={{ 
+          marginBottom: '10px', 
+          padding: '8px', 
+          borderRadius: '5px', 
+          width: '100%', 
+          boxSizing: 'border-box', 
+          color: '#5f5959', 
+          borderColor: '#aba7a7', 
+          borderWidth: 1,
+          borderStyle: 'solid'  
+        }}
       >
         <option value="CoinGold">CoinGold</option>
         <option value="CoinDollar">CoinDollar</option>
@@ -58,7 +68,17 @@ export function SendTransaction() {
         onChange={onRecipientAddressChange}
         aria-label="Recipient"
         placeholder="Recipient Address"
-        style={{ marginBottom: '10px', padding: '8px', borderRadius: '5px', width: '100%', boxSizing: 'border-box' }}
+        style={{
+          marginBottom: '10px', 
+          padding: '8px', 
+          borderRadius: '5px', 
+          width: '100%', 
+          boxSizing: 'border-box', 
+          color: '#5f5959', 
+          borderColor: '#aba7a7', 
+          borderWidth: 1,
+          borderStyle: 'solid'  
+        }}
       />
       <input
         type="text"
@@ -66,7 +86,17 @@ export function SendTransaction() {
         onChange={onAmountChange}
         aria-label="Amount"
         placeholder="Amount"
-        style={{ marginBottom: '10px', padding: '8px', borderRadius: '5px', width: '100%', boxSizing: 'border-box' }}
+        style={{ 
+          marginBottom: '10px', 
+          padding: '8px', 
+          borderRadius: '5px', 
+          width: '100%', 
+          boxSizing: 'border-box', 
+          color: '#5f5959', 
+          borderColor: '#aba7a7', 
+          borderWidth: 1,
+          borderStyle: 'solid'
+         }}
       />
     </div>
     <button
