@@ -6,8 +6,8 @@ import { publicClient } from '../utils/client';
 import styles from "../styles/Home.module.css";
 
 const tokenContracts = {
-    CoinGold: '0xa143fcE4b63BB3e56F4f621349df09B53Bf8e3B8',
-    CoinDollar: '0x14496062DD4a45F00D644791b5C02bdcf9A7187D',
+    CoinGold: '0x712D272A886dCa26D712C274E4b32179e80F5B54',
+    CoinDollar: '0x4fe3E18a4c2292E126b67F8C00D4BEb2115274AB',
     // Add more tokens as needed
 };
 
@@ -19,7 +19,8 @@ export default function Balances() {
     const [expandedAddress, setExpandedAddress] = useState<string | null>(null);
     const coinGoldToken = useToken({ address: tokenContracts.CoinGold });
     const coinDollarToken = useToken({ address: tokenContracts.CoinDollar });
-
+    console.log("Account Address: ", accountAddress);
+    
     const renderAddress = (address: string, token: string) => {
         if (!address) return '';
         return expandedAddress === token ? address : `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
@@ -39,6 +40,7 @@ export default function Balances() {
                     const formattedCoinGoldSupply = parseFloat(coinGoldToken.data.totalSupply.formatted).toFixed(4);
                     supply.CoinGold = formattedCoinGoldSupply;
                     // supply.CoinGold = coinGoldToken.data.totalSupply.formatted;
+                    
                 }
 
                 if (coinDollarToken.isSuccess) {
@@ -60,7 +62,9 @@ export default function Balances() {
                     functionName: 'balanceOf',
                     args: [accountAddress]
                 })
-
+                console.log("CoinGold: ", balanceCoinGold);
+                console.log("CoinDollar: ", balanceCoinDollar);
+                
 
                 if (balanceCoinGold) {
                     const humanReadableCoinGoldBalance = (parseFloat(balanceCoinGold) / 1e18).toFixed(4)
@@ -86,7 +90,7 @@ export default function Balances() {
 
 
     return (
-        <div>
+        <div style={{ display: 'flex', minWidth: '320px', margin: '0 auto', flexDirection: 'column', alignItems: 'center' }}>
             <div>
                 <h3 style={{ marginLeft: "1rem", color: '#5f5959'}}>CoinGold</h3>
                 <div className={styles.card}>

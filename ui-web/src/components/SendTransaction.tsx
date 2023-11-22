@@ -9,6 +9,7 @@ import {
 import { parseEther } from 'viem/utils';
 import { TransferCoinDollar } from '../utils/TransferCoinDollar';
 import { TransferCoinGold } from '../utils/TransferCoinGold';
+import { TransferToken } from '../utils/TransferToken';
 
 export function SendTransaction() {
   const { isConnected } = useAccount();
@@ -32,6 +33,10 @@ export function SendTransaction() {
     e.preventDefault()
     
     console.log('onPress: ', coinType, recipientAddress, amount);
+
+    // if (coinType && recipientAddress && amount) {
+    //   TransferToken(recipientAddress, amount, isConnected)
+    // }
 
     if (coinType === "CoinGold" && recipientAddress && amount) {
       TransferCoinGold(recipientAddress, amount, isConnected);

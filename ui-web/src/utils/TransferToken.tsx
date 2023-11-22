@@ -1,11 +1,10 @@
 import { ethers } from "ethers";
-import abiCoinGold from "../../abi/abi-CoinGold.json";
+import abiCoinDollar from "../../abi/abi-CoinDollar.json";
 import { formatEther } from "viem";
-import { useAccount } from "wagmi";
 
 // Contract address and ABI of the token
-const tokenAddress = "0x712D272A886dCa26D712C274E4b32179e80F5B54"; // Replace with the actual token contract address
-const tokenAbi = abiCoinGold.abi; // Replace with the actual token ABI
+const tokenAddress = "0x4fe3E18a4c2292E126b67F8C00D4BEb2115274AB"; // Replace with the actual token contract address
+const tokenAbi = abiCoinDollar.abi; // Replace with the actual token ABI
 
 // Your wallet's private key and Infura provider
 const privateKey = "69dc40a89741c07cf37dc2a2de9be0a4c5e17f66ff74e8e045372321471492ca"; // Replace with your private key
@@ -17,22 +16,25 @@ const wallet = new ethers.Wallet(privateKey, provider);
 
 // The contract instance of the token
 const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, wallet);
-// const balance = await provider.getBalance("0x2A3D579c2Ca96a9D26FCf3c9Bf05Dc09C16cF89f")
+// const totalSupply = await tokenContract.totalSupply()
 
-export async function TransferCoinGold(recipientAddress: string, amount: string, isConnected: boolean) {
+export async function TransferToken(recipientAddress: string, amount: string, isConnected: boolean) {
   const amountToSend = ethers.parseUnits(amount, 18);
   try {
     const balance = await tokenContract.balanceOf(wallet.address)
     console.log("balance: ", balance);
     const totalSupply = await tokenContract.totalSupply()
     console.log("totalSupply: ", totalSupply);
-    
+
+    if (balance < amountToSend) {
+      alert("Insufficient balance for the transfer.");
+      return;
+    }
     // Estimate gas for the transaction
-    const estimatedGas = await tokenContract.transfer.estimateGas(recipientAddress, amountToSend)
-    console.log("amountToSend", amountToSend);
-    
+    const estimatedGas = await tokenContract.transferCoinGold.estimateGas(recipientAddress, amountToSend)
+
     // Display the gas estimate to the user
-    const gasPrice = (await provider.getFeeData())?.gasPrice 
+    const gasPrice = (await provider.getFeeData())?.gasPrice
     let gasValue;
     if (gasPrice !== null && gasPrice !== undefined) {
       gasValue = ethers.formatEther(gasPrice * estimatedGas);
@@ -41,17 +43,17 @@ export async function TransferCoinGold(recipientAddress: string, amount: string,
       // Handle the case where gasPrice is null or undefined
       console.error('Gas price is null or undefined');
     }
-    
-    // // Ask for user confirmation with gas information
-    const userConfirmation = window.confirm(`Transaction Details:\nRecipient: ${recipientAddress}\nAmount: ${amount.toString()} COINGOLD\nGas Estimate: ${estimatedGas}\nGas Fee: ${gasValue} ETH\n\nConfirm Transaction?`);
+
+    // Ask for user confirmation with gas information
+    const userConfirmation = window.confirm(`Transaction Details:\nRecipient: ${recipientAddress}\nAmount: ${amount.toString()} COINDOLLAR\nGas Estimate: ${estimatedGas}\nGas Fee: ${gasValue} ETH\n\nConfirm Transaction?`);
 
     if (userConfirmation) {
-        // console.log(tokenContract.getChainlinkDataFeedLatestAnswer())
       // Send the transaction
       const transaction = await tokenContract.transfer(recipientAddress, amountToSend);
-      console.log("Transaction hash:", transaction.hash);
+      console.log("Transaction hash: ", transaction.hash);
       await transaction.wait();
       alert("Transfer successful!");
+      // console.log(await tokenContract.transferCoinDollar(recipientAddress, amountToSend))
     } else {
       console.log("Transaction canceled by the user.");
     }
@@ -59,6 +61,4 @@ export async function TransferCoinGold(recipientAddress: string, amount: string,
     console.error("Error transferring tokens:", error);
   }
 }
-
-
 

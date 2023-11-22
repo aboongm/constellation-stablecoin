@@ -51,10 +51,10 @@ export async function TransferCoinDollar(recipientAddress: string, amount: strin
   
       if (userConfirmation) {
         // Send the transaction
-        const transaction = await tokenContract.transfer(recipientAddress, amountToSend);
-        console.log("Transaction hash:", transaction.hash);
-        await transaction.wait();
-        alert("Transfer successful!");
+        // console.log("Transaction hash:", transaction.hash);
+        console.log(await tokenContract.getGoldPrice())
+        // await transaction.wait();
+        // alert("Transfer successful!");
       } else {
         console.log("Transaction canceled by the user.");
       }
