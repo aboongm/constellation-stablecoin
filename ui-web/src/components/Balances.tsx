@@ -19,7 +19,7 @@ export default function Balances() {
     const [expandedAddress, setExpandedAddress] = useState<string | null>(null);
     const coinGoldToken = useToken({ address: tokenContracts.CoinGold });
     const coinDollarToken = useToken({ address: tokenContracts.CoinDollar });
-    console.log("Account Address: ", accountAddress);
+    // console.log("Account Address: ", accountAddress);
     
     const renderAddress = (address: string, token: string) => {
         if (!address) return '';
