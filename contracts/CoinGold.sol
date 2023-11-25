@@ -11,7 +11,7 @@ contract CoinGold is ERC20, AccessControl {
     AggregatorV3Interface internal dataFeed; // Chainlink Aggregator for XAU/USD
     address public owner;
 
-    address private coinDollar;
+    // address private coinDollar;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -84,11 +84,11 @@ contract CoinGold is ERC20, AccessControl {
         return uint256(latestGoldPrice / 1e8) * totalSupplyCoinGold;
     }
     
-   /*  // Add other functions and modifiers as needed to meet requirements
-    function setCoinDollarAddress(address _coinDollar) external onlyRole(ADMIN_ROLE) {
+     // Add other functions and modifiers as needed to meet requirements
+    /* function setCoinDollarAddress(address _coinDollar) external onlyRole(ADMIN_ROLE) {
         coinDollar = _coinDollar;
-    }
- */
+    } */
+
 
     function transferFromUser(address user, address recipient, uint256 amount) external onlyRole(MINTER_ROLE) {
         _transfer(user, recipient, amount);
@@ -107,7 +107,6 @@ contract CoinGold is ERC20, AccessControl {
     function revokeMinterRole(address account) public {
         _revokeRole(MINTER_ROLE, account);
     } 
-
 }
 
 
