@@ -1,24 +1,37 @@
 import { ethers } from 'hardhat';
+import fs from 'fs'
+import { promisify} from 'util'
 
 async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with the account:", deployer.address);
 
-  // Example parameters for the CoinGold constructor
   const name = "CoinGold";
   const symbol = "CNGD";
   const _dataFeedAddress = "0xC5981F461d74c46eB4b0CF3f4Ec79f025573B0Ea";
-  // Deploy the CoinGold contract with the specified parameters
   const CoinGold = await ethers.getContractFactory("CoinGold");
   const token = await CoinGold.deploy(name, symbol, _dataFeedAddress);
 
-  // Get the contract address from the deployed contract instance
   const contractAddress = await token.getAddress();
-  console.log("Token address:", contractAddress);
+  console.log("CoinGold address:", contractAddress);
+
+  let addresses = [
+    `COINGOLD_ADDRESS=${await token.getAddress()}`,
+  ]
+  const data = '\n' + addresses.join('\n')
+
+  const writeFile = promisify(fs.appendFile);
+  const filePath = '.env';
+  return writeFile(filePath, data)
+      .then(() => {
+        console.log('Addresses recorded.');
+      })
+      .catch((error) => {
+        console.error('Error logging addresses:', error);
+        throw error;
+      });
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
