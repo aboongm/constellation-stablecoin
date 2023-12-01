@@ -7,6 +7,7 @@ import {CoinGold} from "./CoinGold.sol"; // Import the CoinGold token contract
 import "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
+
 contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
     CoinGold public coinGold; // Reference to the CoinGold token contract
     AggregatorV3Interface internal goldPriceFeed; // Chainlink Aggregator for XAU/USD
@@ -25,7 +26,6 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
     event Mint(address indexed to, uint256 amount);
     event Burn(address indexed from, uint256 amount);
     event AdjustSupply(uint256 newSupply);
-    event ExchangeGoldToDollar(address indexed user, uint256 coinGoldAmount, uint256 coinDollarAmount);
     
 
     constructor(
@@ -136,50 +136,6 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
         _burn(msg.sender, amount);
         emit Burn(msg.sender, amount);
     }
-
-
-
-    /* function exchangeGoldToDollar(uint256 coinGoldAmount) public {
-        // require(coinGold.balanceOf(msg.sender) >= coinGoldAmount, "Insufficient CoinGold balance");
-
-        coinGold.transferFromUser(address(this), msg.sender, coinGoldAmount);
-
-        // Calculate the equivalent amount of CoinDollar
-        uint256 coinDollarAmount = calculateCoinDollarAmount(coinGoldAmount);
-
-        // Mint the calculated amount of CoinDollar to the user
-        _mint(msg.sender, coinDollarAmount);
-
-        // Emit an event for the exchange
-        emit ExchangeGoldToDollar(msg.sender, coinGoldAmount, coinDollarAmount);
-    }
-
-    // Helper function to calculate the equivalent amount of CoinDollar
-    function calculateCoinDollarAmount(uint256 coinGoldAmount) private view returns (uint256) {
-        (, int256 goldPrice, , , ) = goldPriceFeed.latestRoundData();
-        require(goldPrice > 0, "Invalid gold price");
-
-        uint256 goldPriceUint = uint256(goldPrice);
-
-        uint256 coinDollarAmount = (coinGoldAmount * goldPriceUint) / 1e8; 
-
-        return coinDollarAmount;
-    }
-
-
-
- */
-
-
-
-
-
-
-
-
-
-
-
 
     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
         uint256 totalCapitalizationCoinGold = (getGoldPrice()) * coinGold.totalSupply();
