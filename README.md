@@ -44,17 +44,28 @@ To start using our Gold-Backed Stablecoin, follow these simple steps:
 
 1. Clone the repository: `git clone https://github.com/aboongm/constellation-stablecoin.git`
 2. `cd constellation-stablecoin`
-2. Install dependencies: `yarn install`
-3. Compile the smart contracts: `yarn hardhat compile`
-4. To run the test: `yarn hardhat test`
-3. Deploy the smart contracts: 
+3. Install dependencies: `yarn install`
+4. Compile the smart contracts: `yarn hardhat compile`
+5. To run the test: `yarn hardhat test`
+6. Deploy the smart contracts: 
 
-    3.a. Create your own .env file for using your own private key and infura api
+    6.a. Create your own .env file for using your own private key and infura api
     - `yarn hardhat run ./script/deployCoinGold.ts --network sepolia`
     
-    3.b. on .env, the deployed CoinGold address should be updated.
+    6.b. on .env, the deployed CoinGold address should be updated.
     - `yarn hardhat run ./script/deployCoinDollar.ts --network sepolia`
 
-    
+7. Implement Chainlink Automation:
 
-4. Interact with the stablecoin through your preferred wallet or application.
+    7.a. Go to this website https://automation.chain.link 
+    7.b. Connect to your metamask wallet
+    7.c. Select Sepolia network
+    7.d. Click "Register new Upkeep"
+    7.e. Select "custom logic" and click "next"
+    7.f. Get your CoinDollar address from .env and paste it on "Target contract address" input field
+    7.g. Fill the "Upkeep name" input field with your chosen name
+    7.h. Deposit LINK to your Upkeep. Select an amount that will satisfy multiple performances to start.(5 LINKs or more)
+    7.i. Click that "Register Upkeep" button and confirm the transaction.Wait until your transaction has been confirmed on-chain.
+    7.j. Click "View Upkeep"
+
+8. Interact with the stablecoin through your preferred wallet or application.
