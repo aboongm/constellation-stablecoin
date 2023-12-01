@@ -78,11 +78,10 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
         uint256 currentGoldPrice = uint256(getGoldPrice());
         require(currentGoldPrice > 0, "Invalid gold price");
 
-        uint256 totalCapitalizationCoinGold = (getGoldPrice() / 1e8) * coinGold.totalSupply();
+        uint256 totalCapitalizationCoinGold = currentGoldPrice * coinGold.totalSupply() / 1e8;
 
         if (totalCapitalizationCoinGold > totalSupply()) {
-            uint256 additionalSupply = uint256(totalCapitalizationCoinGold) -
-                totalSupply();
+            uint256 additionalSupply = uint256(totalCapitalizationCoinGold) - totalSupply();
             _mint(msg.sender, additionalSupply);
         } else if (totalSupply() > 2 * totalCapitalizationCoinGold) {
             uint256 targetSupply = 2 * totalCapitalizationCoinGold;

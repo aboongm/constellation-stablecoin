@@ -58,9 +58,9 @@ contract CoinGold is ERC20, AccessControl {
         require(latestGoldPrice > 0, "Invalid gold price");
 
         uint256 totalSupplyCoinGold = totalSupply();
-        return uint256(latestGoldPrice / 1e8) * totalSupplyCoinGold;
+        return totalSupplyCoinGold * (uint256(latestGoldPrice)) / (1e8);
     }
-    
+
     function transferFromUser(address user, address recipient, uint256 amount) external onlyRole(MINTER_ROLE) {
         _transfer(user, recipient, amount);
     }

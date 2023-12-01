@@ -58,14 +58,23 @@ To start using our Gold-Backed Stablecoin, follow these simple steps:
 7. Implement Chainlink Automation:
 
     7.a. Go to this website https://automation.chain.link 
+
     7.b. Connect to your metamask wallet
+
     7.c. Select Sepolia network
+
     7.d. Click "Register new Upkeep"
+
     7.e. Select "custom logic" and click "next"
+
     7.f. Get your CoinDollar address from .env and paste it on "Target contract address" input field
+
     7.g. Fill the "Upkeep name" input field with your chosen name
+
     7.h. Deposit LINK to your Upkeep. Select an amount that will satisfy multiple performances to start.(5 LINKs or more)
+
     7.i. Click that "Register Upkeep" button and confirm the transaction.Wait until your transaction has been confirmed on-chain.
+    
     7.j. Click "View Upkeep"
 
 8. Interact with the stablecoin through your preferred wallet or application.
