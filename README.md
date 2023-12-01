@@ -43,8 +43,18 @@ To account for variations in the price of gold, our stablecoin maintains a dynam
 To start using our Gold-Backed Stablecoin, follow these simple steps:
 
 1. Clone the repository: `git clone https://github.com/aboongm/constellation-stablecoin.git`
+2. `cd constellation-stablecoin`
 2. Install dependencies: `yarn install`
 3. Compile the smart contracts: `yarn hardhat compile`
 4. To run the test: `yarn hardhat test`
-3. Deploy the smart contracts: `yarn hardhat run ./script/deploy_<TokenName>.ts`
+3. Deploy the smart contracts: 
+
+    3.a. Create your own .env file for using your own private key and infura api
+    - `yarn hardhat run ./script/deployCoinGold.ts --network sepolia`
+    
+    3.b. on .env, the deployed CoinGold address should be updated.
+    - `yarn hardhat run ./script/deployCoinDollar.ts --network sepolia`
+
+    
+
 4. Interact with the stablecoin through your preferred wallet or application.
