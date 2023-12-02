@@ -6,9 +6,8 @@ import abiCoinGold from "../../../artifacts/contracts/CoinGold.sol/CoinGold.json
 import abiCoinDollar from "../../../artifacts/contracts/CoinDollar.sol/CoinDollar.json"
 
 const tokenContracts = {
-    CoinGold: '0x712D272A886dCa26D712C274E4b32179e80F5B54',
-    CoinDollar: '0x4fe3E18a4c2292E126b67F8C00D4BEb2115274AB',
-    // Add more tokens as needed
+    CoinGold: import.meta.env.VITE_COINGOLD_ADDRESS,
+    CoinDollar: import.meta.env.VITE_COINDOLLAR_ADDRESS,
 };
 
 export default function Balances() {
@@ -19,7 +18,6 @@ export default function Balances() {
     const [expandedAddress, setExpandedAddress] = useState<string | null>(null);
     const coinGoldToken = useToken({ address: tokenContracts.CoinGold });
     const coinDollarToken = useToken({ address: tokenContracts.CoinDollar });
-    // console.log("Account Address: ", accountAddress);
     
     const renderAddress = (address: string, token: string) => {
         if (!address) return '';
@@ -39,14 +37,11 @@ export default function Balances() {
                 if (coinGoldToken.isSuccess) {
                     const formattedCoinGoldSupply = parseFloat(coinGoldToken.data.totalSupply.formatted).toFixed(4);
                     supply.CoinGold = formattedCoinGoldSupply;
-                    // supply.CoinGold = coinGoldToken.data.totalSupply.formatted;
-                    
                 }
 
                 if (coinDollarToken.isSuccess) {
                     const formattedCoinDollarSupply = parseFloat(coinDollarToken.data.totalSupply.formatted).toFixed(4);
                     supply.CoinDollar = formattedCoinDollarSupply;
-                    // supply.CoinDollar = coinDollarToken.data.totalSupply.formatted;
                 }
 
                 const balanceCoinGold = await publicClient.readContract({
@@ -71,7 +66,6 @@ export default function Balances() {
                     setCoinGoldBalance(humanReadableCoinGoldBalance.toString());
                 }
                 if (balanceCoinDollar) {
-                    // const humanReadableCoinDollarBalance = (parseFloat(balanceCoinDollar) / 1e18).toFixed(4)
                     const humanReadableCoinDollarBalance = (parseFloat(balanceCoinDollar) / 1e18).toFixed(4)
                     setCoinDollarBalance(humanReadableCoinDollarBalance.toString())
                 }
