@@ -57,24 +57,40 @@ To start using our Gold-Backed Stablecoin, follow these simple steps:
 
 7. Implement Chainlink Automation:
 
-    7.a. Go to this website https://automation.chain.link 
+    7.a. Go to this website `https://automation.chain.link` 
 
-    7.b. Connect to your metamask wallet
+    7.b. Connect to your `metamask wallet`
 
-    7.c. Select Sepolia network
+    7.c. Select `Sepolia network`
 
-    7.d. Click "Register new Upkeep"
+    7.d. Click `Register new Upkeep`
 
-    7.e. Select "custom logic" and click "next"
+    7.e. Select `custom logic` and click `next`
 
-    7.f. Get your CoinDollar address from .env and paste it on "Target contract address" input field
+    7.f. Get your CoinDollar address from .env and paste it on `Target contract address` input field
 
-    7.g. Fill the "Upkeep name" input field with your chosen name
+    7.g. Fill the `Upkeep name` input field with your chosen name
 
     7.h. Deposit LINK to your Upkeep. Select an amount that will satisfy multiple performances to start.(5 LINKs or more)
 
-    7.i. Click that "Register Upkeep" button and confirm the transaction.Wait until your transaction has been confirmed on-chain.
+    7.i. Click that `Register Upkeep` button and confirm the transaction.Wait until your transaction has been confirmed on-chain.
     
-    7.j. Click "View Upkeep"
+    7.j. Click `View Upkeep`
 
-8. Interact with the stablecoin through your preferred wallet or application.
+8. To interact with the react frontend 
+
+   (NOTE: generate abis and contract addresses from previous steps before starting the react frontend)
+
+    8.a. cd `ui-web`
+
+    8.b. `yarn` to add the dependencies
+
+    8.c. `yarn run dev` to start the ui.
+
+    8.d. Go to a browser and open `http://localhost:5173/`
+
+    8.e. You should be seeing the details of CoinGold and CoinDollar.
+
+    8.f. To test `Transfer` functionality, use your signer private key with the token balances to sign in to your metamask wallet.
+
+    8.g. Then transfer some token to any wallet address.
