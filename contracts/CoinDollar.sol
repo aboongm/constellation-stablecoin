@@ -82,7 +82,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
 
         if (totalCapitalizationCoinGold > totalSupply()) {
             uint256 additionalSupply = uint256(totalCapitalizationCoinGold) - totalSupply();
-            _mint(msg.sender, additionalSupply);
+            _mint(owner, additionalSupply);
         } else if (totalSupply() > 2 * totalCapitalizationCoinGold) {
             uint256 targetSupply = 2 * totalCapitalizationCoinGold;
             uint256 amountToBurn = totalSupply() - targetSupply;
