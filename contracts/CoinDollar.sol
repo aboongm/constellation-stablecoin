@@ -115,7 +115,7 @@ contract CoinDollar is ERC20, AutomationCompatibleInterface, AccessControl {
     }
 
     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
-        uint256 totalCapitalizationCoinGold = (getGoldPrice()) * coinGold.totalSupply();
+        uint256 totalCapitalizationCoinGold = (getGoldPrice()) * coinGold.totalSupply() / 1e8;
         bool isSupplyTooHigh = totalSupply() > 2 * totalCapitalizationCoinGold;
         bool isSupplyTooLow = totalSupply() < totalCapitalizationCoinGold;
 

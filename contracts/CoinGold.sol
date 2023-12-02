@@ -24,7 +24,7 @@ contract CoinGold is ERC20, AccessControl {
             _dataFeedAddress
         );
         owner = msg.sender;
-        _mint(msg.sender,1000*1e18);
+        _mint(msg.sender,50000*1e18);
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender); 

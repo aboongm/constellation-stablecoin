@@ -132,7 +132,7 @@ describe("CoinDollar", function () {
     });
     
     it("should not change supply when total capitalization is equal to CoinDollar supply", async () => {
-      const initialMintAmount = ethers.parseEther("2000000");
+      const initialMintAmount = ethers.parseEther("100000000");
       await coinDollar.connect(await ethers.provider.getSigner(0)).mint(initialMintAmount);
 
       const initialSupply = await coinDollar.totalSupply();

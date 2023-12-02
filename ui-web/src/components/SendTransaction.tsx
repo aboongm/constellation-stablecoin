@@ -53,7 +53,6 @@ export function SendTransaction() {
       >
         <option value="CoinGold">CoinGold</option>
         <option value="CoinDollar">CoinDollar</option>
-        {/* Add other coin options here */}
       </select>
       <input
         type="text"
@@ -93,7 +92,6 @@ export function SendTransaction() {
       />
     </div>
     <button
-      // disabled={isLoading}
       onClick={onPress}
       style={{
         padding: '10px 20px',
