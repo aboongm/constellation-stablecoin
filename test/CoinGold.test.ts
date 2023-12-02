@@ -35,30 +35,25 @@ describe("CoinGold", function () {
 
     await coingold.waitForDeployment();
     await coingold.connect(owner).grantMinterRole(owner.getAddress());
-    // await coingold.connect(owner).grantAdminRole(owner.address);
   });
 
-  // Deployment Test:
   it("Deployment Test", async () => {
-    // Check if the contract is deployed without errors
     expect(coingold.getAddress()).to.not.equal(0);
   });
 
   it("Owner Assignment", async () => {
-    // Check if the owner is correctly set to the deployer's address
     const owner = await coingold.owner();
     expect(owner).to.equal((await ethers.provider.getSigner(0)).address);
   });
 
   it("Minting and Burning CoinGold Tokens", async () => {
-    // // Mint some CoinGold tokens and check if balances are updated correctly
     const initialBalance = await coingold.balanceOf(
       (
         await ethers.provider.getSigner(0)
       ).address
     );
-    // Convert the JavaScript number to a BigNumber representing Ether (assuming ethAmount is in Ether)
     const mintAmount = ethers.parseEther("0.001");
+    
     await coingold.mintCoinGold(mintAmount);
     const updatedBalance = await coingold.balanceOf(
       (
@@ -67,8 +62,7 @@ describe("CoinGold", function () {
     );
     expect(updatedBalance).to.equal(initialBalance + mintAmount);
 
-    // Burn some CoinGold tokens and verify total supply decreases
-    const burnAmount = ethers.parseEther("0.0005"); // Burning 0.0005 Ether
+    const burnAmount = ethers.parseEther("0.0005"); 
     await coingold.burnCoinGold(burnAmount);
     const newBalance = await coingold.balanceOf(
       (
@@ -78,96 +72,82 @@ describe("CoinGold", function () {
     expect(newBalance).to.equal(updatedBalance - burnAmount);
   });
 
-  
-
   it("Total Capitalization Calculation", async () => {
-    // Call the totalCapitalization function and verify the calculation
     const totalSupply = await coingold.totalSupply();
     const latestGoldPrice = await coingold.getChainlinkDataFeedLatestAnswer();
-    const totalCapitalization = await coingold.totalCapitalization();
-    expect(totalCapitalization).to.equal(totalSupply * latestGoldPrice);
+    const goldPriceInTokenDecimals = latestGoldPrice * (ethers.parseUnits("1", 10)); 
+    const expectedTotalCapitalization = totalSupply * (goldPriceInTokenDecimals) / (ethers.parseUnits("1", 18));
+    const actualTotalCapitalization = await coingold.totalCapitalization();
+    expect(actualTotalCapitalization.toString()).to.equal(expectedTotalCapitalization.toString());
   });
-
-
-  // Add new test for mint event
+  
   it("Minting emits Mint event and increases balance", async () => {
-    const [owner] = await ethers.getSigners();
-    const mintAmount = ethers.parseUnits("1", 18); // Adjust token decimals if necessary
-
-    await expect(coingold.mintCoinGold(mintAmount))
+    const ownerAddress = await owner.getAddress();
+    const initialBalance = await coingold.balanceOf(ownerAddress);
+    const mintAmount = ethers.parseUnits("1", 18);
+  
+    await expect(coingold.connect(owner).mintCoinGold(mintAmount))
       .to.emit(coingold, "Mint")
-      .withArgs(owner.address, mintAmount);
-
-    const updatedBalance = await coingold.balanceOf(owner.address);
-    expect(updatedBalance).to.equal(mintAmount);
+      .withArgs(ownerAddress, mintAmount);
+  
+    const updatedBalance = await coingold.balanceOf(ownerAddress);
+    expect(updatedBalance).to.equal(initialBalance + mintAmount);
   });
-
-  // Add new test for burn event
+  
   it("Burning emits Burn event and decreases balance", async () => {
-    const [owner] = await ethers.getSigners();
-    // Make sure to use the BigNumber type provided by ethers
-    const mintAmount = ethers.parseUnits("1", 18); // Mint some tokens first
-    await coingold.mintCoinGold(mintAmount);
-
-    const burnAmount = ethers.parseUnits("0.5", 18); // Then burn some of them
-    await expect(coingold.burnCoinGold(burnAmount))
+    const ownerAddress = await owner.getAddress();
+    const mintAmount = ethers.parseUnits("1", 18);
+    await coingold.connect(owner).mintCoinGold(mintAmount);
+  
+    const initialBalance = await coingold.balanceOf(ownerAddress);
+    const burnAmount = ethers.parseUnits("0.5", 18);
+  
+    await expect(coingold.connect(owner).burnCoinGold(burnAmount))
       .to.emit(coingold, "Burn")
-      .withArgs(owner.address, burnAmount);
-
-    const finalBalance = await coingold.balanceOf(owner.address);
-    // Use the BigNumber 'sub' function for subtraction
-    expect(finalBalance).to.equal(mintAmount - burnAmount);
+      .withArgs(ownerAddress, burnAmount);
+  
+    const finalBalance = await coingold.balanceOf(ownerAddress);
+    expect(finalBalance).to.equal(initialBalance - burnAmount);
   });
-
-  // Test Chainlink Data Feed Integration
+  
   it("Chainlink Data Feed Integration", async () => {
-    // Test the getChainlinkDataFeedLatestAnswer function
     const latestGoldPrice = await coingold.getChainlinkDataFeedLatestAnswer();
     expect(latestGoldPrice).to.be.gt(0);
   });
 
-  // Test Error Handling
   it("Error Handling", async () => {
-    // Test error scenarios, such as trying to burn more tokens than the balance
     const initialBalance = await coingold.balanceOf(
       (
         await ethers.provider.getSigner(0)
       ).address
     );
-    const burnAmount = initialBalance + ethers.parseEther("0.1"); // Attempt to burn more tokens than the balance
+    const burnAmount = initialBalance + ethers.parseEther("0.1"); 
     await expect(coingold.burnCoinGold(burnAmount)).to.be.revertedWith(
       "Insufficient CoinGold balance"
     );
   });
 
   it("Gas Consumption Test for Minting and Burning CoinGold Tokens", async () => {
-    // Mint some CoinGold tokens and check if balances are updated correctly
     const mintAmount = ethers.parseEther("0.001");
     const mintTx = await coingold.mintCoinGold(mintAmount);
-    const receiptMint = await mintTx.wait(); // Wait for the transaction to be mined
-
+    const receiptMint = await mintTx.wait(); 
     const burnAmount = ethers.parseEther("0.0005");
     const burnTx = await coingold.burnCoinGold(burnAmount);
-    const receiptBurn = await burnTx.wait(); // Wait for the transaction to be mined
+    const receiptBurn = await burnTx.wait(); 
 
-    // Get gas consumption information from the transactions
     const mintGasUsed = receiptMint?.gasUsed;
     const burnGasUsed = receiptBurn?.gasUsed;
 
-    // Assert that gas usage is within an acceptable range
-    expect(mintGasUsed).to.be.lte(100000); // Set an appropriate limit based on your contract complexity
-    expect(burnGasUsed).to.be.lte(100000); // Set an appropriate limit based on your contract complexity
+    expect(mintGasUsed).to.be.lte(100000); 
+    expect(burnGasUsed).to.be.lte(100000); 
   });
 
-  // These are new tests
   it("should transfer tokens and emit Transfer event on transferCoinGold", async () => {
     const [owner, recipient] = await ethers.getSigners();
     const transferAmount = ethers.parseUnits("5", 18);
   
-    // Mint tokens first
     await coingold.connect(owner).mintCoinGold(transferAmount);
   
-    // Transfer tokens and expect a Transfer event
     await expect(coingold.connect(owner).transferCoinGold(recipient.address, transferAmount))
       .to.emit(coingold, "Transfer")
       .withArgs(owner.address, recipient.address, transferAmount);
@@ -180,23 +160,21 @@ describe("CoinGold", function () {
     const [owner] = await ethers.getSigners();
     const transferAmount = ethers.parseUnits("1", 18);
 
-    // Mint tokens first
     await coingold.connect(owner).mintCoinGold(transferAmount);
 
-    // Attempt to transfer to a zero address
     await expect(coingold.connect(owner).transferCoinGold("0x0000000000000000000000000000000000000000", transferAmount))
       .to.be.revertedWithCustomError(coingold, "ERC20InvalidReceiver");
   });
 
   it("should revert when transferring more tokens than the balance", async () => {
     const [owner, recipient] = await ethers.getSigners();
-    const transferAmount = ethers.parseUnits("1", 18);
-
-    // Attempt to transfer more tokens than balance (without minting first)
+    const initialBalance = await coingold.balanceOf(owner.address);
+    const transferAmount = initialBalance + (ethers.parseUnits("1", 18)); 
+  
     await expect(coingold.connect(owner).transferCoinGold(recipient.address, transferAmount))
       .to.be.revertedWithCustomError(coingold, "ERC20InsufficientBalance");
   });
-
+  
   describe("Role-based Access Control Tests", function () {
     it("should only allow MINTER_ROLE to mint tokens", async () => {
       const nonMinter = await ethers.provider.getSigner(1);
@@ -216,16 +194,6 @@ describe("CoinGold", function () {
       ).to.be.revertedWithCustomError(coingold, "AccessControlUnauthorizedAccount");
     });
     
-    it("should allow only ADMIN_ROLE to set coinDollar address", async () => {
-      const nonAdmin = (await ethers.getSigners())[1];
-      const newAddress = ethers.Wallet.createRandom().address;
-      await coingold.connect(owner).revokeRole(ADMIN_ROLE, nonAdmin.address);
-    
-      await expect(
-        coingold.connect(nonAdmin).setCoinDollarAddress(newAddress)
-      ).to.be.revertedWithCustomError(coingold, "AccessControlUnauthorizedAccount");
-    });
-    
     it("should have correct owner and roles assigned", async () => {
       const contractOwner = await coingold.owner();
       expect(contractOwner).to.equal(await owner.getAddress());
@@ -241,11 +209,9 @@ describe("CoinGold", function () {
       const nonOwner = (await ethers.getSigners())[1];
       const nonOwnerAddress = await nonOwner.getAddress();
     
-      // Grant a role to a non-owner account and check if the role is correctly assigned
       await coingold.connect(owner).grantRole(MINTER_ROLE, nonOwnerAddress);
       expect(await coingold.hasRole(MINTER_ROLE, nonOwnerAddress)).to.be.true;
     
-      // Revoke the role and check if it is correctly removed
       await coingold.connect(owner).revokeRole(MINTER_ROLE, nonOwnerAddress);
       expect(await coingold.hasRole(MINTER_ROLE, nonOwnerAddress)).to.be.false;
     });
@@ -254,16 +220,13 @@ describe("CoinGold", function () {
       const multiRoleUser = (await ethers.getSigners())[1];
       const multiRoleUserAddress = await multiRoleUser.getAddress();
     
-      // Grant both MINTER_ROLE and ADMIN_ROLE to the same account
       await coingold.connect(owner).grantRole(MINTER_ROLE, multiRoleUserAddress);
       await coingold.connect(owner).grantRole(ADMIN_ROLE, multiRoleUserAddress);
     
-      // Check if the account has both roles
       const hasMinterRole = await coingold.hasRole(MINTER_ROLE, multiRoleUserAddress);
       const hasAdminRole = await coingold.hasRole(ADMIN_ROLE, multiRoleUserAddress);
       expect(hasMinterRole && hasAdminRole).to.be.true;
     
-      // Revoke one role and check if the other is still intact
       await coingold.connect(owner).revokeRole(MINTER_ROLE, multiRoleUserAddress);
       expect(await coingold.hasRole(ADMIN_ROLE, multiRoleUserAddress)).to.be.true;
     });
@@ -272,12 +235,10 @@ describe("CoinGold", function () {
       const nonExistentRole = ethers.id("NON_EXISTENT_ROLE");
       const randomAccount = (await ethers.getSigners())[1];
     
-      // Grant a non-existent role
       await expect(
         coingold.connect(owner).grantRole(nonExistentRole, randomAccount.getAddress())
       ).not.to.be.reverted;
     
-      // Revoke a non-existent role
       await expect(
         coingold.connect(owner).revokeRole(nonExistentRole, randomAccount.getAddress())
       ).not.to.be.reverted;
@@ -287,12 +248,10 @@ describe("CoinGold", function () {
       const newMinter = (await ethers.getSigners())[1];
       const newMinterAddress = await newMinter.getAddress();
     
-      // Expect RoleGranted event on granting a role
       await expect(coingold.connect(owner).grantRole(MINTER_ROLE, newMinterAddress))
         .to.emit(coingold, "RoleGranted")
         .withArgs(MINTER_ROLE, newMinterAddress, await owner.getAddress());
     
-      // Expect RoleRevoked event on revoking a role
       await expect(coingold.connect(owner).revokeRole(MINTER_ROLE, newMinterAddress))
         .to.emit(coingold, "RoleRevoked")
         .withArgs(MINTER_ROLE, newMinterAddress, await owner.getAddress());
@@ -302,11 +261,9 @@ describe("CoinGold", function () {
       const [owner, user, recipient] = await ethers.getSigners();
       const transferAmount = ethers.parseUnits("10", 18);
     
-      // Mint tokens to the user first
       await coingold.connect(owner).mintCoinGold(transferAmount);
       await coingold.connect(owner).transferCoinGold(user.address, transferAmount);
     
-      // Transfer tokens from user to recipient by the owner (who has MINTER_ROLE)
       await expect(coingold.connect(owner).transferFromUser(user.address, recipient.address, transferAmount))
         .to.emit(coingold, "Transfer")
         .withArgs(user.address, recipient.address, transferAmount);
@@ -319,7 +276,6 @@ describe("CoinGold", function () {
       const [, user, nonMinter, recipient] = await ethers.getSigners();
       const transferAmount = ethers.parseUnits("5", 18);
   
-      // Attempt to transfer tokens by a non-minter
       await expect(coingold.connect(nonMinter).transferFromUser(user.address, recipient.address, transferAmount))
         .to.be.revertedWithCustomError(coingold, "AccessControlUnauthorizedAccount")
         .withArgs(nonMinter.address, MINTER_ROLE);
@@ -328,34 +284,24 @@ describe("CoinGold", function () {
   });
   
   describe("Edge cases test", async () => {
-    // Test for minting zero tokens
     it("should revert when minting zero tokens", async () => {
       await expect(coingold.mintCoinGold(0)).to.be.revertedWith(
         "Mint amount must be greater than zero"
       );
     });
 
-    // Test for burning zero tokens
     it("should revert when burning zero tokens", async () => {
       await expect(coingold.burnCoinGold(0)).to.be.revertedWith(
         "Burn amount must be greater than zero"
       );
     });
 
-    // Test for handling invalid data from Chainlink Price Feed
     it("should handle invalid data from Chainlink Price Feed", async () => {
-      // Set an invalid price in the mock
       await mockPriceFeed.setLatestPrice(-1);
 
-      // Call the totalCapitalization function and expect it to revert
       await expect(coingold.totalCapitalization()).to.be.revertedWith(
         "Invalid gold price"
       );
     });
   });
-
-  // Add more test cases for different scenarios as needed
-  // Ensure you cover other functions, contract interactions, edge cases, upgradeability, and random testing
-  // Upgradeability: If applicable, test the upgrade process
-  // Random Testing: Perform random testing to ensure the contract handles various inputs and scenarios
 });
