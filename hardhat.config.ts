@@ -9,6 +9,8 @@ const INFURA_API_KEY = process.env.INFURA_API_KEY || "8158ae5ca93b4957aeabdcdae0
 
 const SEPOLIA_PRIVATE_KEY = process.env.SEPOLIA_PRIVATE_KEY ||
   "69dc40a89741c07cf37dc2a2de9be0a4c5e17f66ff74e8e045372321471492ca";
+
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "NABS5BXVX8WGYTECEN483FRRVSUN7UXCCA"
   
 
 const config: HardhatUserConfig = {
@@ -28,6 +30,12 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: true,
   },
+  etherscan: {
+    apiKey: {
+      sepolia: ETHERSCAN_API_KEY
+    }
+  }
+
 };
 
 export default config;
