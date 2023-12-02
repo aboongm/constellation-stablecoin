@@ -84,12 +84,14 @@ To start using our Gold-Backed Stablecoin, follow these simple steps:
 
     8.b. `yarn` to add the dependencies
 
-    8.c. `yarn run dev` to start the ui.
+    8.c. Create `.env` file in ui-web folder, and copy the token addresses from `.env` in hardhat root. Prefix the variable names with `VITE_` 
 
-    8.d. Go to a browser and open `http://localhost:5173/`
+    8.d. `yarn run dev` to start the ui.
 
-    8.e. You should be seeing the details of CoinGold and CoinDollar.
+    8.e. Go to a browser and open `http://localhost:5173/`
 
-    8.f. To test `Transfer` functionality, use your signer private key with the token balances to sign in to your metamask wallet.
+    8.f. You should be seeing the details of CoinGold and CoinDollar.
 
-    8.g. Then transfer some token to any wallet address.
+    8.g. To test `Transfer` functionality, use your signer private key with the token balances to sign in to your metamask wallet.
+
+    8.h. Then transfer some token to any wallet address.
