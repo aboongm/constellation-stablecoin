@@ -8,19 +8,19 @@ export async function TransferCoinGold(recipientAddress: string, amount: string,
   const provider = new ethers.BrowserProvider(window.ethereum);
   
   const signer = await provider.getSigner();
-  console.log("Account:", await signer.getAddress());
+  // console.log("Account:", await signer.getAddress());
 
   const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
 
   const amountToSend = ethers.parseUnits(amount, 18);
   try {
     const balance = await tokenContract.balanceOf(signer)
-    console.log("balance: ", balance);
+    // console.log("balance: ", balance);
     const totalSupply = await tokenContract.totalSupply()
-    console.log("totalSupply: ", totalSupply);
+    // console.log("totalSupply: ", totalSupply);
 
     const estimatedGas = await tokenContract.transfer.estimateGas(recipientAddress, amountToSend)
-    console.log("amountToSend", amountToSend);
+    // console.log("amountToSend", amountToSend);
 
     const gasPrice = (await provider.getFeeData())?.gasPrice
     let gasValue;
@@ -34,7 +34,7 @@ export async function TransferCoinGold(recipientAddress: string, amount: string,
 
     if (userConfirmation) {
       const transaction = await tokenContract.transfer(recipientAddress, amountToSend);
-      console.log("Transaction hash:", transaction.hash);
+      // console.log("Transaction hash:", transaction.hash);
       await transaction.wait();
       alert("Transfer successful!");
     } else {
