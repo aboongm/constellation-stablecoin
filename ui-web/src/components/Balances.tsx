@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useAccount, useToken } from 'wagmi';
-import abiCoinGold from "../../abi/abi-CoinGold.json"
-import abiCoinDollar from "../../abi/abi-CoinDollar.json"
 import { publicClient } from '../utils/client';
 import styles from "../styles/Home.module.css";
+import abiCoinGold from "../../../artifacts/contracts/CoinGold.sol/CoinGold.json"
+import abiCoinDollar from "../../../artifacts/contracts/CoinDollar.sol/CoinDollar.json"
 
 const tokenContracts = {
     CoinGold: '0x712D272A886dCa26D712C274E4b32179e80F5B54',
