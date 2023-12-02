@@ -1,8 +1,9 @@
 import { ethers } from "ethers";
-import abiCoinDollar from "../../abi/abi-CoinDollar.json";
+// import abiCoinDollar from "../../abi/abi-CoinDollar.json";
+import abiCoinDollar from "../../../artifacts/contracts/CoinDollar.sol/CoinDollar.json"
 
 // Contract address and ABI of the token
-const tokenAddress = "0x4fe3E18a4c2292E126b67F8C00D4BEb2115274AB"; // Replace with the actual token contract address
+const tokenAddress = import.meta.env.VITE_COINDOLLAR_ADDRESS; // Replace with the actual token contract address
 const tokenAbi = abiCoinDollar.abi; // Replace with the actual token ABI
 
 const provider = new ethers.BrowserProvider(window.ethereum);
@@ -10,7 +11,7 @@ const provider = new ethers.BrowserProvider(window.ethereum);
   // It will prompt user for account connections if it isnt connected
   const signer = await provider.getSigner();
   console.log("Account:", await signer.getAddress());
-
+  
   // The contract instance of the token using the signer
   const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
 
