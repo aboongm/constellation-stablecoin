@@ -1,10 +1,11 @@
 import { ethers } from "ethers";
-import abiCoinGold from "../../abi/abi-CoinGold.json";
+// import abiCoinGold from "../../abi/abi-CoinGold.json";
+import abiCoinGold from "../../../artifacts/contracts/CoinGold.sol/CoinGold.json"
 
 export async function TransferCoinGold(recipientAddress: string, amount: string, isConnected: boolean) {
 
   // Contract address and ABI of the token
-  const tokenAddress = "0x712D272A886dCa26D712C274E4b32179e80F5B54"; // Replace with the actual token contract address
+  const tokenAddress = import.meta.env.VITE_COINGOLD_ADDRESS; // Replace with the actual token contract address
   const tokenAbi = abiCoinGold.abi; // Replace with the actual token ABI
   const provider = new ethers.BrowserProvider(window.ethereum);
   
