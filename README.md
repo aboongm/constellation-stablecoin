@@ -9,8 +9,7 @@ Welcome to the Gold-Backed Stablecoin Project, where we introduce a unique stabl
 - [Introduction](#gold-backed-stablecoin-project)
 - [How It Works](#how-it-works)
 - [Features](#features)
-- [Usage](#usage)
-- [Installation](#installation)
+- [Usage](#usage) / [Installation](#usage)
 - [Contributing](#contributing)
 - [License](#license)
 
